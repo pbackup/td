@@ -1,0 +1,119 @@
+<project name="project-template-drupal">
+
+    <description>
+	Custom Tasks for Drupal 6.x Project.
+    </description>
+
+    <property name="project.files.upload" value="sites/default/files/**/*"/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value="sites/default/files sites/default/files/**/*"/>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <drush task="site-install" args=""/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            echo y | php ${build.path.src}/drush/drush.php --root='${build.path.src}' site-install;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build" description="Migrate database to the latest version (local)">
+        <drush task="updatedb"/>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build" description="Migrate database to the latest version (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' updatedb;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <mysql input="${build.path.src}/sql/${project.name}.sql"/>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build" description="Load fixtures to database (remote)">
+        <var name="cmd" value="
+            cat ${build.path.src}/sql/${project.name}.sql | mysql -u${build.database.username} -p${build.database.password} ${build.database.name};"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:clean:local" depends=":properties:build" description="Clean application-source (local)">
+        <!-- Delete build and dist directory trees -->
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${build.path.dist}">
+                <include name="**/*"/>
+            </fileset>
+        </delete>
+
+        <!-- Delete release info -->
+        <delete file="${build.path.src}/RELEASE.txt"/>
+
+        <!-- Clear drupal cache -->
+        <drush task="cache-clear all"/>
+    </target>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <chmod perm="u+rwX" type="both" file="${build.path.src}/sites/default/settings.php"/>
+        <replaceregexp file="${build.path.src}/sites/default/settings.php"
+                       match="\$$db_url *=.*"
+                       replace="$$db_url = &quot;mysqli:\/\/${build.database.username}:${build.database.password}@${build.database.host}\/${build.database.name}&quot;;"
+                       flags="g"/>
+
+        <!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src} ${build.path.home}/public_html;
+
+	        chmod u+rwX ${build.path.src}/sites/default/settings.php;
+	        sed -i 's/\$$db_url *=.*;/$$db_url = &quot;mysqli:\/\/${build.database.username}:${build.database.password}@${build.database.host}\/${build.database.name}&quot;;/' ${build.path.src}/sites/default/settings.php;
+
+	        cd ${build.path.src}; if [ -n '${project.files.chmod}' ]; then chmod -Rf a+rwX ${project.files.chmod}; echo ''; fi;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+        <drush task="variable-set smtp_host ${build.mail.host}" args="--always-set"/>
+        <drush task="variable-set smtp_username ${build.mail.username}" args="--always-set"/>
+        <drush task="variable-set smtp_password ${build.mail.password}" args="--always-set"/>
+
+        <!-- Clear drupal cache -->
+        <drush task="cache-clear all"/>
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+        <var name="cmd" value="
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_host ${build.mail.host} --always-set;
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_username ${build.mail.username} --always-set;
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_password ${build.mail.password} --always-set;
+
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' cache-clear all;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>

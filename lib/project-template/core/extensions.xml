@@ -1,0 +1,15 @@
+<project name="project-template-extensions">
+
+    <description>
+        Extensions for Project Template.
+    </description>
+
+    <!-- Enable ant-contrib extension -->
+    <typedef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="${basedir}/lib/ant-contrib/ant-contrib.jar"/>
+            <pathelement location="${basedir}/lib/jsch/jsch.jar"/>
+        </classpath>
+    </typedef>
+
+</project>

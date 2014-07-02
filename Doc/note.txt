@@ -1,0 +1,3 @@
+# If login user send message non contacted user, that user will be added into the contact list automatically. 
+# Updating message board with message text by pulling in some interval. (Lowest priority).  
+

@@ -1,0 +1,140 @@
+<project name="project-template-zend">
+
+    <description>
+	Custom Tasks for Zend 1.x (with Doctrine 2.x) Project.
+    </description>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value="application/cache/**/* application/logs/**/*"/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <doctrine task="orm:schema-tool:drop" args="--force"/>
+        <doctrine task="orm:schema-tool:create"/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/bin/doctrine orm:schema-tool:drop --force;
+            php ${build.path.src}/bin/doctrine orm:schema-tool:create;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build" description="Migrate database to the latest version (local)">
+        <doctrine task="migrations:migrate" args="--no-interaction --configuration=${build.path.src}/application/configs/migrations.yml"/>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build" description="Migrate database to the latest version (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/bin/doctrine migrations:migrate --no-interaction --configuration=${build.path.src}/application/configs/migrations.yml;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <doctrine task="fixtures:load" args=""/>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build" description="Load fixtures to database (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/bin/doctrine fixtures:load;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:clean:local" depends=":properties:build" description="Clean application-source (local)">
+        <!-- Delete build and dist directory trees -->
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${build.path.dist}">
+                <include name="**/*"/>
+            </fileset>
+        </delete>
+
+        <!-- Delete release info -->
+        <delete file="${build.path.src}/RELEASE.txt"/>
+
+        <!-- Clear symfony cache -->
+	<!-- TODO -->
+    </target>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}/public"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="doctrine.connection.host *=.*"
+                       replace="doctrine.connection.host = &quot;${build.database.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="doctrine.connection.dbname *=.*"
+                       replace="doctrine.connection.dbname = &quot;${build.database.name}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="doctrine.connection.user *=.*"
+                       replace="doctrine.connection.user = &quot;${build.database.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="doctrine.connection.password *=.*"
+                       replace="doctrine.connection.password = &quot;${build.database.password}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.username *=.*"
+                       replace="resources.db.params.username = &quot;${build.database.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.password *=.*"
+                       replace="resources.db.params.password = &quot;${build.database.password}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.host *=.*"
+                       replace="resources.mail.params.host = &quot;${build.mail.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.user *=.*"
+                       replace="resources.mail.params.user = &quot;${build.mail.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.password *=.*"
+                       replace="resources.mail.params.password = &quot;${build.mail.password}&quot;"/>
+
+        <!-- Clear zend cache -->
+	<!-- TODO -->
+
+	<!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src}/public ${build.path.home}/public_html;
+
+	        sed -i 's/doctrine.connection.host *=.*/doctrine.connection.host = \&quot;${build.database.host}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/doctrine.connection.dbname *=.*/doctrine.connection.dbname = \&quot;${build.database.name}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/doctrine.connection.user *=.*/doctrine.connection.user = \&quot;${build.database.username}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/doctrine.connection.password *=.*/doctrine.connection.password = \&quot;${build.database.password}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.host *=.*/resources.db.params.host = \&quot;${build.database.host}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.dbname *=.*/resources.db.params.dbname = \&quot;${build.database.name}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.username *=.*/resources.db.params.username = \&quot;${build.database.username}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.password *=.*/resources.db.params.password = \&quot;${build.database.password}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/mailer_host *=.*/mailer_host = \&quot;${build.mail.host}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/mailer_user *=.*/mailer_user = \&quot;${build.mail.username}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/mailer_password *=.*/mailer_password = \&quot;${build.mail.password}\&quot;/' ${build.path.src}/application/configs/application.ini;
+
+	    if [ -n '${project.files.chmod}' ]; then cd ${build.path.src}; chmod -Rf a+rwX ${project.files.chmod}; fi;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>

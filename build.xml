@@ -1,0 +1,172 @@
+<!-- Rename the project -->
+<project name="tabledom" default="" basedir=".">
+    <description>
+        Ant build script for ${project.name}-${project.version}.
+        See 'ant -p' for usage.
+
+        Requirements
+        ============
+        * jsch.jar in $ANT/lib (http://www.jcraft.com/jsch/)
+        * ant-contrib.jar in $ANT/lib (http://ant-contrib.sourceforge.net/)
+    </description>
+
+    <!-- Set custom properties -->
+    <property file="build.properties"/>
+
+    <!-- Additional custom tasks and overridden tasks -->
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}/web"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <!-- Run Composer -->
+        
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="database_host:.*"
+                       replace="database_host: ${build.database.host}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="database_name:.*"
+                       replace="database_name: ${build.database.name}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="database_user:.*"
+                       replace="database_user: ${build.database.username}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="database_password:.*"
+                       replace="database_password: ${build.database.password}"/>
+
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="mailer_host:.*"
+                       replace="mailer_host: ${build.mail.host}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="mailer_user:.*"
+                       replace="mailer_user: ${build.mail.username}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="mailer_password:.*"
+                       replace="mailer_password: ${build.mail.password}"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="mailer_encryption:.*"
+                       replace="mailer_encryption: ${build.mail.encryption}"/>
+
+        <replaceregexp file="${build.path.src}/app/config/parameters.yml"
+                       match="mailer_auth_mode:.*"
+                       replace="mailer_authmode: ${build.mail.authmode}"/>
+                
+        <!-- Clear Symfony cache -->
+        <symfony task="cache:clear" args=""/>
+        <symfony task="cache:clear" args="--env=prod"/>
+
+        <!-- File permissions -->
+        <chmod perm="a+rx" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="app/console"/>
+                <!--include name="app/Resources/wkhtmltopdf/*"/>
+                <include name="app/Resources/selinux/*"/-->
+            </fileset>
+        </chmod>
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+
+        <!-- Kill php processes -->
+        <sh-cmd cmd="pkill" args="-u ${build.shell.username} php-cgi || true"/>
+        <sh-cmd cmd="pkill" args="-u ${build.shell.username} php5-cgi || true"/>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src}/web ${build.path.home}/public_html;
+
+            php ${build.path.src}/composer.phar --no-interaction --working-dir='${build.path.src}' install;
+
+            sed -i 's/database_host:.*/database_host: ${build.database.host}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/database_name:.*/database_name: ${build.database.name}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/database_user:.*/database_user: ${build.database.username}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/database_password:.*/database_password: ${build.database.password}/' ${build.path.src}/app/config/parameters.yml;
+
+            sed -i 's/mailer_host:.*/mailer_host: ${build.mail.host}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/mailer_user:.*/mailer_user: ${build.mail.username}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/mailer_password:.*/mailer_password: ${build.mail.password}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/mailer_encryption:.*/mailer_encryption: ${build.mail.encryption}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/mailer_auth_mode:.*/mailer_auth_mode: ${build.mail.authmode}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/wkhtmltopdf_arch:.*/wkhtmltopdf_arch: ${build.wkhtmltopdf.arch}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/sms_acknowledge:.*/sms_acknowledge: ${build.sms.acknowledge}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/s3_userkey:.*/s3_userkey: ${build.s3.userkey}/' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's%s3_usersecret:.*%s3_usersecret: ${build.s3.usersecret}%' ${build.path.src}/app/config/parameters.yml;
+            sed -i 's/s3_attachmentpath:.*/s3_attachmentpath: ${build.s3.attachmentpath}/' ${build.path.src}/app/config/parameters.yml;
+
+            php ${build.path.src}/app/console cache:clear;            
+            php ${build.path.src}/app/console cache:clear --env=prod;
+            php ${build.path.src}/app/console assets:install --symlink;
+
+            chmod a+rx ${build.path.src}/app/console;            
+
+            if [ -n '${project.files.chmod}' ]; then cd ${build.path.src}; chmod -Rf a+rwX ${project.files.chmod}; fi;
+
+            pkill -u ${build.shell.username} php-cgi || true;
+            pkill -u ${build.shell.username} php5-cgi || true;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <property name="options.database.fixtures-system-only" value="false"/>
+    <property name="options.database.fixtures-demo-only" value="false"/>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+        <if>
+            <equals arg1="${options.database.fixtures-system-only}" arg2="true"/>
+            <then>
+                <symfony task="doctrine:fixtures:load"
+                         args="--fixtures=${build.path.src}/src/Cerp/ModelBundle/DataFixtures/ORM/System"/>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.fixtures-demo-only}" arg2="true"/>
+            <then>
+                <mkdir dir="${build.path.build}"/>
+                <unzip src="${build.path.src}/crp.sql.zip" dest="${build.path.build}"/>
+                <mysql input="${build.path.build}/crp.sql"/>
+                <delete>
+                    <fileset dir="${build.path.build}">
+                        <include name="crp.sql"/>
+                    </fileset>
+                </delete>
+            </then>
+        </if>
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+        <if>
+            <equals arg1="${options.database.fixtures-system-only}" arg2="true"/>
+            <then>
+                <var name="cmd" value="
+                    php ${build.path.src}/app/console doctrine:fixtures:load --fixtures=${build.path.src}/src/Cerp/ModelBundle/DataFixtures/ORM/System;
+                "/>
+                <ssh-cmd command="${cmd}"/>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.fixtures-demo-only}" arg2="true"/>
+            <then>
+                <var name="cmd" value="
+                    mkdir -p ${build.path.build};
+                    unzip -q -o ${build.path.src}/crp.sql.zip -d ${build.path.build};
+                    cat ${build.path.build}/crp.sql | mysql -h${build.database.host} -u${build.database.username} -p${build.database.password} ${build.database.name};
+                    rm -f ${build.path.build}/crp.sql;
+                "/>
+                <ssh-cmd command="${cmd}"/>
+            </then>
+        </if>
+    </target>
+
+    <!-- Import framework specific files -->
+    <import file="${basedir}/lib/project-template/framework/symfony2.xml"/>
+
+    <!-- Import project-template files -->
+    <import file="${basedir}/lib/project-template/build.xml"/>
+
+</project>

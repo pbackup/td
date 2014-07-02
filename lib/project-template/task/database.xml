@@ -1,0 +1,110 @@
+<project name="project-template-tasks-database">
+
+    <description>
+        Database Tasks for Project Template.
+    </description>
+
+    <target name="database:reset" depends=":properties:build" description="Reset database">
+        <antcall inheritAll="false" target="database:reset:${build.type}"/>
+    </target>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <mysqladmin task="drop ${build.database.name}" args="--force"/>
+        <mysqladmin task="create ${build.database.name}"/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            mysqladmin -h${build.database.host} -u${build.database.username} -p${build.database.password} drop ${build.database.name} --force;
+            mysqladmin -h${build.database.host} -u${build.database.username} -p${build.database.password} create ${build.database.name};
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:pack" depends=":properties:build" description="Pack database">
+        <antcall inheritAll="false" target="database:pack:${build.type}"/>
+    </target>
+
+    <target name="database:pack:local" depends=":properties:build" description="Pack database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <mkdir dir="${build.path.dist}"/>
+        <mysqldump output="${build.path.build}/DATABASE.SQL"/>
+        <zip destfile="${build.path.dist}/${package.database}" update="false">
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.SQL"/>
+            </fileset>
+        </zip>
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.SQL"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="database:pack:remote" depends=":properties:build" description="Pack database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            mkdir -p ${build.path.dist};
+            mysqldump -h${build.database.host} -u${build.database.username} -p${build.database.password} ${build.database.name} > ${build.path.build}/DATABASE.SQL;
+            cd ${build.path.build}; zip ${build.path.dist}/${package.database} DATABASE.SQL;
+            rm -f ${build.path.build}/DATABASE.SQL;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:unpack" depends=":properties:build" description="Unpack database">
+        <antcall inheritAll="false" target="database:unpack:${build.type}"/>
+    </target>
+
+    <target name="database:unpack:local" depends=":properties:build" description="Unpack database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <unzip src="${build.path.dist}/${package.database}" dest="${build.path.build}"/>
+        <mysql input="${build.path.build}/DATABASE.SQL"/>
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.SQL"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="database:unpack:remote" depends=":properties:build" description="Unpack database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            unzip -q -o ${build.path.dist}/${package.database} -d ${build.path.build};
+            cat ${build.path.build}/DATABASE.SQL | mysql -h${build.database.host} -u${build.database.username} -p${build.database.password} ${build.database.name};
+            rm -f ${build.path.build}/DATABASE.SQL;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate" depends=":properties:build" description="Migrate database to the latest version">
+        <antcall inheritAll="false" target="database:migrate:${build.type}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build"
+            description="Migrate database to the latest version (local)">
+        <echo>WARNING: Need custom/framework task for database:migrate:local</echo>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build"
+            description="Migrate database to the latest version (remote)">
+        <echo>WARNING: Need custom/framework task for database:migrate:remote</echo>
+    </target>
+
+    <target name="database:fixtures" depends=":properties:build" description="Load fixtures to database">
+        <antcall inheritAll="false" target="database:fixtures:${build.type}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <echo>WARNING: Need custom/framework task for database:fixtures:local</echo>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build"
+            description="Load fixtures to database (remote)">
+        <echo>WARNING: Need custom/framework task for database:fixtures:remote</echo>
+    </target>
+
+</project>
+

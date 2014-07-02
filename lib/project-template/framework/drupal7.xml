@@ -1,0 +1,169 @@
+<project name="project-template-drupal">
+
+    <description>
+	Custom Tasks for Drupal 7.x Project.
+    </description>
+
+    <property name="project.files.upload" value="sites/default/files/**/*"/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <mysqladmin task="drop ${build.database.name}" args="--force"/>
+        <mysqladmin task="create ${build.database.name}"/>
+        <drush task="site-install" args="-y --account-name=admin --account-pass=admin"/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            mysqladmin -h${build.database.host} -u${build.database.username} -p${build.database.password} drop ${build.database.name} --force;
+            mysqladmin -h${build.database.host} -u${build.database.username} -p${build.database.password} create ${build.database.name};
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' site-install -y --account-name=admin --account-pass=admin;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build" description="Migrate database to the latest version (local)">
+        <drush task="updatedb"/>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build" description="Migrate database to the latest version (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' updatedb;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <mysql input="${build.path.src}/sql/${project.name}.sql"/>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build" description="Load fixtures to database (remote)">
+        <var name="cmd" value="
+            cat ${build.path.src}/sql/${project.name}.sql | mysql -u${build.database.username} -p${build.database.password} ${build.database.name};"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:clean:local" depends=":properties:build" description="Clean application-source (local)">
+        <!-- Delete build and dist directory trees -->
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${build.path.dist}">
+                <include name="**/*"/>
+            </fileset>
+        </delete>
+
+        <!-- Delete release info -->
+        <delete file="${build.path.src}/RELEASE.txt"/>
+
+        <!-- Clear drupal cache -->
+        <drush task="cache-clear all"/>
+    </target>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <chmod perm="u+rwX" type="both" file="${build.path.src}/sites/default"/>
+        <chmod perm="u+rwX" type="both" file="${build.path.src}/sites/default/settings.php"/>
+        <replaceregexp file="${build.path.src}/sites/default/settings.php"
+                       match="\$$databases *=[^;]*;"
+                       replace="$$databases = array(&quot;default&quot; => array(&quot;default&quot; => array(&quot;database&quot; => &quot;${build.database.name}&quot;, &quot;username&quot; => &quot;${build.database.username}&quot;, &quot;password&quot; => &quot;${build.database.password}&quot;, &quot;host&quot; => &quot;${build.database.host}&quot;, &quot;port&quot; => &quot;&quot;, &quot;driver&quot; => &quot;mysql&quot;, &quot;prefix&quot; => &quot;&quot;)));"
+                       flags="s"/>
+
+        <!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+        <!-- Kill php processes -->
+        <sh-cmd cmd="pkill" args="-u ${build.shell.username} php-cgi || true"/>
+        <sh-cmd cmd="pkill" args="-u ${build.shell.username} php5-cgi || true"/>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <!-- File permissions -->
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src} ${build.path.home}/public_html;
+
+	        chmod u+rwX ${build.path.src}/sites/default;
+	        chmod u+rwX ${build.path.src}/sites/default/settings.php;
+	        sed -ni '1h;1!H;$${;g;s/\$$databases *=[^;]*;/$$databases = array(&quot;default&quot; => array(&quot;default&quot; => array(&quot;database&quot; => &quot;${build.database.name}&quot;, &quot;username&quot; => &quot;${build.database.username}&quot;, &quot;password&quot; => &quot;${build.database.password}&quot;, &quot;host&quot; => &quot;${build.database.host}&quot;, &quot;port&quot; => &quot;&quot;, &quot;driver&quot; => &quot;mysql&quot;, &quot;prefix&quot; => &quot;&quot;)));/g;p;}' ${build.path.src}/sites/default/settings.php;
+
+	        cd ${build.path.src}; if [ -n '${project.files.chmod}' ]; then chmod -Rf a+rwX ${project.files.chmod}; echo ''; fi;"/>
+	    <ssh-cmd command="${cmd}"/>
+        <!-- Kill php processes -->
+        <var name="cmd2" value="
+            pkill -u ${build.shell.username} php-cgi || true;
+            pkill -u ${build.shell.username} php5-cgi || true;
+        "/>
+        <ssh-cmd command="${cmd2}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+        <drush task="variable-set smtp_host ${build.mail.host}" args="--always-set"/>
+        <drush task="variable-set smtp_username ${build.mail.username}" args="--always-set"/>
+        <drush task="variable-set smtp_password ${build.mail.password}" args="--always-set"/>
+
+        <!-- Clear drupal cache -->
+        <drush task="cache-clear all"/>
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+        <var name="cmd" value="
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_host ${build.mail.host} --always-set;
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_username ${build.mail.username} --always-set;
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' variable-set smtp_password ${build.mail.password} --always-set;
+
+            php ${build.path.src}/drush/drush.php --root='${build.path.src}' cache-clear all;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name=":sync:database" depends=":properties" description="Sync the database">
+        <antcall inheritAll="false" target="database:pack">
+            <param name="target.build" value="${target.deploy}"/>
+        </antcall>
+        <antcall inheritAll="false" target="database:transfer">
+            <param name="target.build" value="${target.deploy}"/>
+            <param name="target.deploy" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="database:unpack">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="app:config2">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Syncing database complete!</echo>
+    </target>
+
+    <target name=":sync:files" depends=":properties" description="Sync the uploaded-files">
+        <antcall inheritAll="false" target="files:pack">
+            <param name="target.build" value="${target.deploy}"/>
+        </antcall>
+        <antcall inheritAll="false" target="files:transfer">
+            <param name="target.build" value="${target.deploy}"/>
+            <param name="target.deploy" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="files:unpack">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="app:config2">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Syncing files complete!</echo>
+    </target>
+
+</project>

@@ -1,0 +1,192 @@
+<project name="project-template-django1">
+
+    <description>
+        Custom Tasks for Django 1.x Project.
+    </description>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <django task="flush" args="--noinput"/>
+        <django task="syncdb" args="--noinput --all --migrate"/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            python ${build.path.src}/manage.py flush --noinput;
+	        python ${build.path.src}/manage.py syncdb --noinput --all --migrate;
+	     "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:pack:local" depends=":properties:build" description="Pack database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <mkdir dir="${build.path.dist}"/>
+        <django task="dumpdata" output="${build.path.build}/DATABASE.JSON"/>
+        <zip destfile="${build.path.dist}/${package.database}" update="false">
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.JSON"/>
+            </fileset>
+        </zip>
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.JSON"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="database:pack:remote" depends=":properties:build" description="Pack database (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.build};
+            mkdir -p ${build.path.dist};
+            python ${build.path.src}/manage.py dumpdata > ${build.path.build}/DATABASE.JSON;
+            cd ${build.path.build}; zip ${build.path.dist}/${package.database} DATABASE.JSON;
+            rm -f ${build.path.build}/DATABASE.JSON;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:unpack:local" depends=":properties:build" description="Unpack database (local)">
+        <mkdir dir="${build.path.build}"/>
+        <unzip src="${build.path.dist}/${package.database}" dest="${build.path.build}"/>
+        <django task="loaddata ${build.path.build}/DATABASE.JSON"/>
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="DATABASE.JSON"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="database:unpack:remote" depends=":properties:build" description="Unpack database (remote)">
+        <var name="cmd" value="
+            mkdir ${build.path.build};
+            unzip -q -o ${build.path.dist}/${package.database} -d ${build.path.build};
+            python ${build.path.src}/manage.py loaddata ${build.path.build}/DATABASE.JSON;
+            rm -f ${build.path.build}/DATABASE.SQL;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build"
+            description="Migrate database to the latest version (local)">
+        <django task="syncdb" args="--noinput --all --migrate"/>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build"
+            description="Migrate database to the latest version (remote)">
+        <var name="cmd" value="
+            python ${build.path.src}/manage.py syncdb --noinput --all --migrate;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <django task="loaddata" args=""/>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build"
+            description="Load fixtures to database (remote)">
+        <var name="cmd" value="
+            python ${build.path.src}/manage.py loaddata;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:clean:local" depends=":properties:build" description="Clean application-source (local)">
+        <!-- Delete build and dist directory trees -->
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${build.path.dist}">
+                <include name="**/*"/>
+            </fileset>
+        </delete>
+
+        <!-- Delete release info -->
+        <delete file="${build.path.src}/RELEASE.txt"/>
+
+        <!-- Clear django cache -->
+        <echo>WARNING: Django cache-clean not supported yet.</echo>
+    </target>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="DATABASES\[['&quot;]default['&quot;]\]\[['&quot;]HOST['&quot;]\] *=.*"
+                       replace="DATABASES\['default'\]\['HOST'\] = '${build.database.host}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="DATABASES\[['&quot;]default['&quot;]\]\[['&quot;]NAME['&quot;]\] *=.*"
+                       replace="DATABASES\['default'\]\['NAME'\] = '${build.database.name}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="DATABASES\[['&quot;]default['&quot;]\]\[['&quot;]USER['&quot;]\] *=.*"
+                       replace="DATABASES\['default'\]\['USER'\] = '${build.database.username}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="DATABASES\[['&quot;]default['&quot;]\]\[['&quot;]PASSWORD['&quot;]\] *=.*"
+                       replace="DATABASES\['default'\]\['PASSWORD'\] = '${build.database.password}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="EMAIL_HOST *=.*"
+                       replace="EMAIL_HOST = '${build.mail.host}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="EMAIL_HOST_USER *=.*"
+                       replace="EMAIL_HOST_USER = '${build.mail.username}'"/>
+        <replaceregexp file="${build.path.src}/settings.py"
+                       match="EMAIL_HOST_PASSWORD *=.*"
+                       replace="EMAIL_HOST_PASSWORD = '${build.mail.password}'"/>
+
+        <!-- Clear django cache -->
+        <echo>WARNING: Django cache-clean not supported yet.</echo>
+
+        <!-- File permissions -->
+        <chmod perm="a+x" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="*.fcgi"/>
+            </fileset>
+        </chmod>
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src} ${build.path.home}/public_html;
+
+            sed -i &quot;s/DATABASES\[[\'\&quot;]default[\'\&quot;]\]\[[\'\&quot;]HOST[\'\&quot;]\] *=.*/DATABASES\[\'default\'\]\[\'HOST\'\] = \'${build.database.host}\'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/DATABASES\[[\'\&quot;]default[\'\&quot;]\]\[[\'\&quot;]NAME[\'\&quot;]\] *=.*/DATABASES\[\'default\'\]\[\'NAME\'\] = \'${build.database.name}\'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/DATABASES\[[\'\&quot;]default[\'\&quot;]\]\[[\'\&quot;]USER[\'\&quot;]\] *=.*/DATABASES\[\'default\'\]\[\'USER\'\] = \'${build.database.username}\'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/DATABASES\[[\'\&quot;]default[\'\&quot;]\]\[[\'\&quot;]PASSWORD[\'\&quot;]\] *=.*/DATABASES\[\'default\'\]\[\'PASSWORD\'\] = \'${build.database.password}\'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/EMAIL_HOST *=.*/EMAIL_HOST = '${build.mail.host}'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/EMAIL_HOST_USER *=.*/EMAIL_HOST_USER = '${build.mail.username}'/&quot; ${build.path.src}/settings.py;
+            sed -i &quot;s/EMAIL_HOST_PASSWORD *=.*/EMAIL_HOST_PASSWORD = '${build.mail.password}'/&quot; ${build.path.src}/settings.py;
+
+            echo 'WARNING: Django cache-clean not supported yet.';
+	    
+            if [ -e ${build.path.src}/*.fcgi ]; then cd ${build.path.src}; chmod -Rf a+x *.fcgi; fi;
+            if [ -n '${project.files.chmod}' ]; then cd ${build.path.src}; chmod -Rf a+rwX ${project.files.chmod}; fi;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>

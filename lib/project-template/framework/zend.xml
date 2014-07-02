@@ -1,0 +1,82 @@
+<project name="project-template-zend">
+
+    <description>
+	Custom Tasks for Zend 1.x Project.
+    </description>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}/public"
+                 overwrite="true"
+                 failonerror="false"/>
+                 
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.host *=.*"
+                       replace="resources.db.params.host = &quot;${build.database.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.dbname *=.*"
+                       replace="resources.db.params.dbname = &quot;${build.database.name}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.username *=.*"
+                       replace="resources.db.params.username = &quot;${build.database.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.db.params.password *=.*"
+                       replace="resources.db.params.password = &quot;${build.database.password}&quot;"/>
+
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.host *=.*"
+                       replace="resources.mail.params.host = &quot;${build.mail.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.user *=.*"
+                       replace="resources.mail.params.user = &quot;${build.mail.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/application/configs/application.ini"
+                       match="resources.mail.params.password *=.*"
+                       replace="resources.mail.params.password = &quot;${build.mail.password}&quot;"/>
+
+        <!-- Clear zend cache -->
+	<!-- TODO -->
+
+	<!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src}/public ${build.path.home}/public_html;
+
+            sed -i 's/resources.db.params.host *=.*/resources.db.params.host = \&quot;${build.database.host}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.dbname *=.*/resources.db.params.dbname = \&quot;${build.database.name}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.username *=.*/resources.db.params.username = \&quot;${build.database.username}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/resources.db.params.password *=.*/resources.db.params.password = \&quot;${build.database.password}\&quot;/' ${build.path.src}/application/configs/application.ini;
+
+            sed -i 's/mailer_host *=.*/mailer_host = \&quot;${build.mail.host}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/mailer_user *=.*/mailer_user = \&quot;${build.mail.username}\&quot;/' ${build.path.src}/application/configs/application.ini;
+            sed -i 's/mailer_password *=.*/mailer_password = \&quot;${build.mail.password}\&quot;/' ${build.path.src}/application/configs/application.ini;
+
+	    if [ -n '${project.files.chmod}' ]; then cd ${build.path.src}; chmod -Rf a+rwX ${project.files.chmod}; fi;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>

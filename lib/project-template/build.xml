@@ -1,0 +1,39 @@
+<!-- Rename the project -->
+<project name="project-template" default="" basedir=".">
+
+    <description>
+        Ant build script for ${project.name}-${project.version}.
+        See 'ant -p' for usage.
+
+        Requirements
+        ============
+        * jsch.jar in $ANT/lib (http://www.jcraft.com/jsch/)
+        * ant-contrib.jar in $ANT/lib (http://ant-contrib.sourceforge.net/)
+    </description>
+
+    <!-- Set custom properties -->
+    <property file="build.properties"/>
+
+    <!-- Additional custom tasks and overridden tasks -->
+
+    <!-- Import framework specific files -->
+    <!-- import file="framework/symfony1.xml"/-->
+    <!-- import file="framework/symfony2.xml"/-->
+    <!-- import file="framework/drupal6.xml"/-->
+    <!-- import file="framework/drupal7.xml"/-->
+    <!-- import file="framework/django1.xml"/-->
+    <!-- import file="framework/pimcore1.xml"/-->
+    <!-- import file="framework/zend1.xml"/-->
+    <!-- import file="framework/zend1-doctrine2.xml"/-->
+
+    <!-- Import project-template files -->
+    <import file="core/properties.xml"/>
+    <import file="core/extensions.xml"/>
+    <import file="core/macros.xml"/>
+    <import file="task/app.xml"/>
+    <import file="task/files.xml"/>
+    <import file="task/database.xml"/>
+    <import file="task/transfer.xml"/>
+    <import file="task/general.xml"/>
+
+</project>

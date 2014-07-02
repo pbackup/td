@@ -1,0 +1,130 @@
+<project name="project-template-tasks-transfer">
+
+    <description>
+	Application/Files/Database Transfer Tasks for Project Template.
+    </description>
+
+    <target name="files:transfer" depends=":properties" description="Transfer uploaded-files package">
+        <antcall inheritAll="false" target="files:transfer:${build.type}-to-${deploy.type}"/>
+    </target>
+
+    <target name="files:transfer:local-to-local" depends=":properties" description="Transfer uploaded-files package (local->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.files}"
+            todir="${deploy.path.dist}/${package.files}">
+        </scp>
+    </target>
+
+    <target name="files:transfer:remote-to-remote" depends=":properties" description="Transfer uploaded-files package (remote->remote)">
+        <ssh-cmd command="mkdir -p ${build.path.dist}" host="${build.shell.host}" username="${build.shell.username}" password="${build.shell.password}"/>
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp-cmd
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.files}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.files}">
+        </scp-cmd>
+    </target>
+
+    <target name="files:transfer:local-to-remote" depends=":properties" description="Transfer uploaded-files package (local->remote)">
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.files}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.files}">
+        </scp>
+    </target>
+
+    <target name="files:transfer:remote-to-local" depends=":properties" description="Transfer uploaded-files package (remote->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.files}"
+            todir="${deploy.path.dist}/${package.files}">
+        </scp>
+    </target>
+
+    <target name="database:transfer" depends=":properties" description="Transfer database package">
+        <antcall inheritAll="false" target="database:transfer:${build.type}-to-${deploy.type}"/>
+    </target>
+
+    <target name="database:transfer:local-to-local" depends=":properties" description="Transfer database package (local->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.database}"
+            todir="${deploy.path.dist}/${package.database}">
+        </scp>
+    </target>
+
+    <target name="database:transfer:remote-to-remote" depends=":properties" description="Transfer database package (remote->remote)">
+        <ssh-cmd command="mkdir -p ${build.path.dist}" host="${build.shell.host}" username="${build.shell.username}" password="${build.shell.password}"/>
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp-cmd
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.database}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.database}">
+        </scp-cmd>
+    </target>
+
+    <target name="database:transfer:local-to-remote" depends=":properties" description="Transfer database package (local->remote)">
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.database}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.database}">
+        </scp>
+    </target>
+
+    <target name="database:transfer:remote-to-local" depends=":properties" description="Transfer database package (remote->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.database}"
+            todir="${deploy.path.dist}/${package.database}">
+        </scp>
+    </target>
+
+    <target name="app:transfer" depends=":properties" description="Transfer application package">
+        <antcall inheritAll="false" target="app:transfer:${build.type}-to-${deploy.type}"/>
+    </target>
+
+    <target name="app:transfer:local-to-local" depends=":properties" description="Transfer application package (local->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.app}"
+            todir="${deploy.path.dist}/${package.app}">
+        </scp>
+    </target>
+
+    <target name="app:transfer:remote-to-remote" depends=":properties" description="Transfer application package (remote->remote)">
+        <ssh-cmd command="mkdir -p ${build.path.dist}" host="${build.shell.host}" username="${build.shell.username}" password="${build.shell.password}"/>
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp-cmd
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.app}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.app}">
+        </scp-cmd>
+    </target>
+
+    <target name="app:transfer:local-to-remote" depends=":properties" description="Transfer application package (local->remote)">
+        <ssh-cmd command="mkdir -p ${deploy.path.dist}" host="${deploy.shell.host}" username="${deploy.shell.username}" password="${deploy.shell.password}"/>
+        <scp
+            trust="true"
+            file="${build.path.dist}/${package.app}"
+            todir="${deploy.shell.username}:${deploy.shell.password}@${deploy.shell.host}:${deploy.path.dist}/${package.app}">
+        </scp>
+    </target>
+
+    <target name="app:transfer:remote-to-local" depends=":properties" description="Transfer application package (remote->local)">
+        <mkdir dir="${deploy.path.dist}"/>
+        <scp
+            trust="true"
+            file="${build.shell.username}:${build.shell.password}@${build.shell.host}:${build.path.dist}/${package.app}"
+            todir="${deploy.path.dist}/${package.app}">
+        </scp>
+    </target>
+
+</project>

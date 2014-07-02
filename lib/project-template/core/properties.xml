@@ -1,0 +1,71 @@
+<project name="project-template-properties">
+
+    <description>
+        Properties for Project Template.
+    </description>
+
+    <!-- Set global properties -->
+    <property environment="env"/>
+    <tstamp>
+        <format property="now" pattern="yyyy-MM-dd-HHmmss"/>
+    </tstamp>
+
+    <!-- Set default properties -->
+    <property name="project.name" value="${ant.project.name}"/>
+    <property name="project.version" value="1.0"/>
+    <property name="project.password" value="${project.name}"/>
+
+    <property name="project.target.build" value="local"/>
+    <property name="project.target.deploy" value="dev"/>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value=""/>
+
+    <property name="package.app" value="${project.name}-app-${project.version}.zip"/>
+    <property name="package.files" value="${project.name}-files-${project.version}.zip"/>
+    <property name="package.database" value="${project.name}-database-${project.version}.zip"/>
+
+    <property name="options.app.reset" value="false"/>
+    <property name="options.app.deploy" value="false"/>
+    <property name="options.files.reset" value="false"/>
+    <property name="options.files.deploy" value="false"/>
+    <property name="options.database.reset" value="false"/>
+    <property name="options.database.deploy" value="false"/>
+    <property name="options.database.migrate" value="false"/>
+    <property name="options.database.fixtures" value="false"/>
+
+    <!-- Set job properties -->
+    <property name="target.build" value="${project.target.build}"/>
+    <property name="target.deploy" value="${project.target.deploy}"/>
+
+    <target name=":properties" depends=":properties:build, :properties:deploy" description="Show debug info">
+    </target>
+
+    <target name=":properties:build" description="Set build properties">
+        <propertyselector property="build.properties"
+                          delimiter=","
+                          match="${target.build}\.(.*)"
+                          select="\1"/>
+        <for list="${build.properties}" param="property">
+            <sequential>
+                <propertycopy property="build.@{property}" from="${target.build}.@{property}"/>
+            </sequential>
+        </for>
+        <echo>target.build=${target.build}, build.type=${build.type}, build.path.home=${build.path.home}</echo>
+    </target>
+
+    <target name=":properties:deploy" description="Set deploy properties">
+        <propertyselector property="deploy.properties"
+                          delimiter=","
+                          match="${target.deploy}\.(.*)"
+                          select="\1"/>
+        <for list="${deploy.properties}" param="property">
+            <sequential>
+                <propertycopy property="deploy.@{property}" from="${target.deploy}.@{property}"/>
+            </sequential>
+        </for>
+        <echo>target.deploy=${target.deploy}, deploy.type=${deploy.type}, deploy.path.home=${deploy.path.home}</echo>
+    </target>
+
+</project>

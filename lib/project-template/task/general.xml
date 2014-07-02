@@ -1,0 +1,194 @@
+<project name="project-template-tasks-general">
+
+    <description>
+        General Tasks for Project Template.
+    </description>
+
+    <!-- Reset the project -->
+    <target name=":reset" depends=":properties" description="Reset the project">
+        <antcall inheritAll="false" target="app:reset">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Reset complete! project</echo>
+    </target>
+
+    <!-- Clean up the project -->
+    <target name=":clean" depends=":properties" description="Clean the project">
+        <antcall inheritAll="false" target="app:clean">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Clean complete! project</echo>
+    </target>
+
+    <!-- Build the project -->
+    <target name=":build" depends=":properties" description="Build the project">
+        <antcall inheritAll="false" target="app:release">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Building complete! project</echo>
+    </target>
+
+    <!-- Create the distribution package -->
+    <target name=":dist" depends=":properties" description="Create the project distribution">
+        <if>
+            <equals arg1="${options.app.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="app:pack">
+                    <param name="target.build" value="${target.build}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.files.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="files:pack">
+                    <param name="target.build" value="${target.build}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="database:pack">
+                    <param name="target.build" value="${target.build}"/>
+                </antcall>
+            </then>
+        </if>
+        <echo>Distribution complete!</echo>
+    </target>
+
+    <!-- Deploy the distribution package -->
+    <target name=":deploy" depends=":properties" description="Deploy the project distribution">
+        <if>
+            <equals arg1="${options.app.reset}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="app:reset">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.app.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="app:transfer">
+                    <param name="target.build" value="${target.build}"/>
+                    <param name="target.deploy" value="${target.deploy}"/>
+                </antcall>
+                <antcall inheritAll="false" target="app:unpack">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+                <antcall inheritAll="false" target="app:config">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.files.reset}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="files:reset">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.files.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="files:transfer">
+                    <param name="target.build" value="${target.build}"/>
+                    <param name="target.deploy" value="${target.deploy}"/>
+                </antcall>
+                <antcall inheritAll="false" target="files:unpack">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.reset}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="database:reset">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="database:transfer">
+                    <param name="target.build" value="${target.build}"/>
+                    <param name="target.deploy" value="${target.deploy}"/>
+                </antcall>
+                <antcall inheritAll="false" target="database:unpack">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.fixtures}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="database:fixtures">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.app.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="app:config2">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.database.migrate}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="database:migrate">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <if>
+            <equals arg1="${options.app.deploy}" arg2="true"/>
+            <then>
+                <antcall inheritAll="false" target="app:config3">
+                    <param name="target.build" value="${target.deploy}"/>
+                </antcall>
+            </then>
+        </if>
+        <echo>Deployment complete!</echo>
+    </target>
+
+    <!-- Sync the project distribution -->
+    <target name=":sync" depends=":sync:files, :sync:database" description="Sync the project distribution">
+        <echo>Syncing complete!</echo>
+    </target>
+
+    <target name=":sync:files" depends=":properties" description="Sync the uploaded-files">
+        <antcall inheritAll="false" target="files:pack">
+            <param name="target.build" value="${target.deploy}"/>
+        </antcall>
+        <antcall inheritAll="false" target="files:transfer">
+            <param name="target.build" value="${target.deploy}"/>
+            <param name="target.deploy" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="files:unpack">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Syncing files complete!</echo>
+    </target>
+
+    <target name=":sync:database" depends=":properties" description="Sync the database">
+        <antcall inheritAll="false" target="database:pack">
+            <param name="target.build" value="${target.deploy}"/>
+        </antcall>
+        <antcall inheritAll="false" target="database:transfer">
+            <param name="target.build" value="${target.deploy}"/>
+            <param name="target.deploy" value="local"/>
+        </antcall>
+        <antcall inheritAll="false" target="database:unpack">
+            <param name="target.build" value="local"/>
+        </antcall>
+        <echo>Syncing database complete!</echo>
+    </target>
+
+</project>
+

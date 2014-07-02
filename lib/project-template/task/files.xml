@@ -1,0 +1,75 @@
+<project name="project-template-tasks-files">
+
+    <description>
+        Files Tasks for Project Template.
+    </description>
+
+    <target name="files:reset" depends=":properties:build" description="Reset uploaded-files">
+        <antcall inheritAll="false" target="files:reset:${build.type}"/>
+    </target>
+
+    <target name="files:reset:local" depends=":properties:build" description="Reset uploaded-files (local)">
+        <delete>
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.upload}"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="files:reset:remote" depends=":properties:build" description="Reset uploaded-files (remote)">
+        <var name="cmd" value="
+            cd ${build.path.src}; if [ -n '${project.files.upload}' ]; then rm -Rf ${project.files.upload}; fi;
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="files:pack" depends=":properties:build" description="Pack uploaded-files">
+        <antcall inheritAll="false" target="files:pack:${build.type}"/>
+    </target>
+
+    <target name="files:pack:local" depends=":properties:build" description="Pack uploaded-files (local)">
+        <mkdir dir="${build.path.dist}"/>
+        <zip destfile="${build.path.dist}/${package.files}" update="false" whenempty="create">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.upload}"/>
+                <exclude name="${project.files.ignore}"/>
+                <!-- Leave out SVN and GIT info -->
+                <exclude name=".svn*/*"/>
+                <exclude name=".git*/*"/>
+            </fileset>
+        </zip>
+    </target>
+
+    <target name="files:pack:remote" depends=":properties:build" description="Pack uploaded-files (remote)">
+        <var name="emptyZipFile"
+             value="\\x50\\x4b\\x05\\x06\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00"/>
+        <var name="cmd" value="
+            rm -f ${build.path.dist}/${package.files};
+            mkdir -p ${build.path.dist};
+            cd ${build.path.src}; if [ -n '${project.files.upload}' ]; then zip -r ${build.path.dist}/${package.files} ${project.files.upload} -x '${project.files.ignore} .svn*/* .git*/*'; fi;
+            if [ ! -f ${build.path.dist}/${package.files} ]; then echo -en ${emptyZipFile} > ${build.path.dist}/${package.files}; fi;
+            echo '(Ignore any empty zip warnings!)';
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="files:unpack" depends=":properties:build" description="Unpack uploaded-files">
+        <antcall inheritAll="false" target="files:unpack:${build.type}"/>
+    </target>
+
+    <target name="files:unpack:local" depends=":properties:build" description="Unpack uploaded-files (local)">
+        <mkdir dir="${build.path.src}"/>
+        <unzip src="${build.path.dist}/${package.files}" dest="${build.path.src}"/>
+    </target>
+
+    <target name="files:unpack:remote" depends=":properties:build" description="Unpack uploaded-files (remote)">
+        <var name="cmd" value="
+            mkdir -p ${build.path.src};
+            unzip -q -o ${build.path.dist}/${package.files} -d ${build.path.src};
+            echo '(Ignore any empty zip warnings!)';
+        "/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+</project>
+

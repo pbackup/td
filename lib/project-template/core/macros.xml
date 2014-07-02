@@ -1,0 +1,443 @@
+<project name="project-template-macros">
+
+    <description>
+        Macros for Project Template.
+    </description>
+
+    <!-- Convenient macro for shell commands -->
+    <macrodef name="sh-cmd">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="cmd" default="pwd"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <var name="sh-cmd.message" value="Running SHELL command: @{cmd} @{args}"/>
+            <if>
+                <not>
+                    <equals arg1="@{input}" arg2=""/>
+                </not>
+                <then>
+                    <var name="sh-cmd.message" value="${sh-cmd.message} &lt; @{input}"/>
+                </then>
+            </if>
+            <if>
+                <not>
+                    <equals arg1="@{output}" arg2=""/>
+                </not>
+                <then>
+                    <var name="sh-cmd.message" value="${sh-cmd.message} &gt; @{output}"/>
+                </then>
+            </if>
+            <echo>${sh-cmd.message}</echo>
+
+            <if>
+                <and>
+                    <equals arg1="@{input}" arg2=""/>
+                    <equals arg1="@{output}" arg2=""/>
+                </and>
+                <then>
+                    <exec executable="@{cmd}" dir="@{path}" vmlauncher="false">
+                        <arg line="@{args}"/>
+                    </exec>
+                </then>
+            </if>
+            <if>
+                <and>
+                    <not>
+                        <equals arg1="@{input}" arg2=""/>
+                    </not>
+                    <equals arg1="@{output}" arg2=""/>
+                </and>
+                <then>
+                    <exec executable="@{cmd}" dir="@{path}" input="@{input}" vmlauncher="false">
+                        <arg line="@{args}"/>
+                    </exec>
+                </then>
+            </if>
+            <if>
+                <and>
+                    <equals arg1="@{input}" arg2=""/>
+                    <not>
+                        <equals arg1="@{output}" arg2=""/>
+                    </not>
+                </and>
+                <then>
+                    <exec executable="@{cmd}" dir="@{path}" output="@{output}" vmlauncher="false">
+                        <arg line="@{args}"/>
+                    </exec>
+                </then>
+            </if>
+            <if>
+                <and>
+                    <not>
+                        <equals arg1="@{input}" arg2=""/>
+                    </not>
+                    <not>
+                        <equals arg1="@{output}" arg2=""/>
+                    </not>
+                </and>
+                <then>
+                    <exec executable="@{cmd}" dir="@{path}" input="@{input}" output="@{output}" vmlauncher="false">
+                        <arg line="@{args}"/>
+                    </exec>
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for php commands -->
+    <macrodef name="php-cmd">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="cmd" default=""/>
+        <attribute name="args" default="--version"/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{php}" args="@{cmd} @{args}" input="@{input}" output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for python commands -->
+    <macrodef name="python-cmd">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="python" default="python"/>
+        <attribute name="cmd" default=""/>
+        <attribute name="args" default="--version"/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{python}" args="@{cmd} @{args}" input="@{input}" output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for composer command -->
+    <macrodef name="composer">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="composer" default="composer.phar"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <php-cmd path="@{path}" php="@{php}" cmd="@{composer}" args="@{task} @{args}" input="@{input}"
+                     output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for doctrine console -->
+    <macrodef name="doctrine">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="doctrine" default="bin/doctrine"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <php-cmd path="@{path}" php="@{php}" cmd="@{doctrine}" args="@{task} @{args}" input="@{input}"
+                     output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for symfony 2.x console -->
+    <macrodef name="symfony">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="symfony" default="app/console"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <php-cmd path="@{path}" php="@{php}" cmd="@{symfony}" args="@{task} @{args}" input="@{input}"
+                     output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for symfony 1.x console -->
+    <macrodef name="symfony1">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="symfony" default="symfony"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <php-cmd path="@{path}" php="@{php}" cmd="@{symfony}" args="@{task} @{args}" input="@{input}"
+                     output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for drush console -->
+    <macrodef name="drush">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="php" default="php"/>
+        <attribute name="drush" default="drush/drush.php"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <php-cmd path="@{path}" php="@{php}" cmd="@{drush}" args="@{task} @{args}" input="@{input}"
+                     output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for django console -->
+    <macrodef name="django">
+        <attribute name="path" default="${build.path.src}"/>
+        <attribute name="python" default="python"/>
+        <attribute name="django" default="manage.py"/>
+        <attribute name="task" default="help"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <python-cmd path="@{path}" python="@{python}" cmd="@{django}" args="@{task} @{args}" input="@{input}"
+                        output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for mysql command -->
+    <macrodef name="mysql">
+        <attribute name="path" default="${build.path.build}"/>
+        <attribute name="mysql" default="mysql"/>
+        <attribute name="host" default="${build.database.host}"/>
+        <attribute name="username" default="${build.database.username}"/>
+        <attribute name="password" default="${build.database.password}"/>
+        <attribute name="database" default="${build.database.name}"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{mysql}" args="-h@{host} -u@{username} -p@{password} @{database} @{args}"
+                    input="@{input}" output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for mysqldump command -->
+    <macrodef name="mysqldump">
+        <attribute name="path" default="${build.path.build}"/>
+        <attribute name="mysqldump" default="mysqldump"/>
+        <attribute name="host" default="${build.database.host}"/>
+        <attribute name="username" default="${build.database.username}"/>
+        <attribute name="password" default="${build.database.password}"/>
+        <attribute name="database" default="${build.database.name}"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{mysqldump}" args="-h@{host} -u@{username} -p@{password} @{database} @{args}"
+                    input="@{input}" output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for mysqladmin command -->
+    <macrodef name="mysqladmin">
+        <attribute name="path" default="${build.path.build}"/>
+        <attribute name="mysqladmin" default="mysqladmin"/>
+        <attribute name="username" default="${build.database.username}"/>
+        <attribute name="password" default="${build.database.password}"/>
+        <attribute name="task" default=""/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{mysqladmin}" args="-u@{username} -p@{password} @{task} @{args}"
+                    input="@{input}" output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for psql command -->
+    <macrodef name="psql">
+        <attribute name="psql" default="psql"/>
+        <attribute name="path" default="${build.path.build}"/>
+        <attribute name="host" default="${build.database.host}"/>
+        <attribute name="username" default="${build.database.username}"/>
+        <attribute name="password" default="${build.database.password}"/>
+        <attribute name="database" default="${build.database.name}"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{psql}" args="-h@{host} -U@{username} @{database} @{args}" input="@{input}"
+                    output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for pg_dump command -->
+    <macrodef name="pgdump">
+        <attribute name="path" default="${build.path.build}"/>
+        <attribute name="pgdump" default="pg_dump"/>
+        <attribute name="host" default="${build.database.host}"/>
+        <attribute name="username" default="${build.database.username}"/>
+        <attribute name="password" default="${build.database.password}"/>
+        <attribute name="database" default="${build.database.name}"/>
+        <attribute name="args" default=""/>
+        <attribute name="input" default=""/>
+        <attribute name="output" default=""/>
+        <sequential>
+            <sh-cmd path="@{path}" cmd="@{pgdump}" args="-h@{host} -U@{username} @{database} @{args}" input="@{input}"
+                    output="@{output}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for sshexec (uses optional keyfile) -->
+    <macrodef name="ssh-cmd">
+        <attribute name="command" default="uptime"/>
+        <attribute name="failonerror" default="true"/>
+        <attribute name="host" default="${build.shell.host}"/>
+        <attribute name="username" default="${build.shell.username}"/>
+        <attribute name="password" default="${build.shell.password}"/>
+        <attribute name="keyfile" default="${build.shell.keyfile}"/>
+        <sequential>
+            <if>
+                <equals arg1="@{keyfile}" arg2=""/>
+                <then>
+                    <echo>Running SSH command: AS @{username} ON @{host}</echo>
+                    <sshexec
+                            trust="true"
+                            host="@{host}"
+                            username="@{username}"
+                            password="@{password}"
+                            failonerror="@{failonerror}"
+                            command="@{command}"/>
+                </then>
+                <else>
+                    <echo>Running SSH command: AS @{username} ON @{host} KEY @{keyfile}</echo>
+                    <sshexec
+                            trust="true"
+                            host="@{host}"
+                            username="@{username}"
+                            keyfile="@{keyfile}"
+                            failonerror="@{failonerror}"
+                            command="@{command}"/>
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <!-- Convenient macro for scp (fakes remote-to-remote scp, and also uses optional keyfiles) -->
+    <macrodef name="scp-cmd">
+        <attribute name="trust" default="true"/>
+        <attribute name="file"/>
+        <attribute name="todir"/>
+        <attribute name="tempfile" default="/tmp/${project.name}-tmp-${project.version}-${now}"/>
+        <attribute name="type" default="local2local"/>
+        <attribute name="fromkeyfile" default=""/>
+        <attribute name="tokeyfile" default=""/>
+        <sequential>
+            <if>
+                <equals arg1="@{type}" arg2="local2local"/>
+                <then>
+                    <echo>Running COPY command: @{file} TO @{todir}</echo>
+                    <copy
+                            file="@{file}"
+                            todir="@{todir}">
+                    </copy>
+                </then>
+            </if>
+            <if>
+                <equals arg1="@{type}" arg2="local2remote"/>
+                <then>
+                    <if>
+                        <equals arg1="@{tokeyfile}" arg2=""/>
+                        <then>
+                            <echo>Running SCP command: @{file} TO @{todir}</echo>
+                            <scp
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{todir}">
+                            </scp>
+                        </then>
+                        <else>
+                            <echo>Running SCP command: @{file} TO @{todir} KEY @{tokeyfile}</echo>
+                            <scp
+                                    keyfile="@{tokeyfile}"
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{todir}">
+                            </scp>
+                        </else>
+                    </if>
+                </then>
+            </if>
+            <if>
+                <equals arg1="@{type}" arg2="remote2local"/>
+                <then>
+                    <if>
+                        <equals arg1="@{fromkeyfile}" arg2=""/>
+                        <then>
+                            <echo>Running SCP command: @{file} TO @{todir}</echo>
+                            <scp
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{todir}">
+                            </scp>
+                        </then>
+                        <else>
+                            <echo>Running SCP command: @{file} KEY @{fromkeyfile} TO @{todir}</echo>
+                            <scp
+                                    keyfile="@{fromkeyfile}"
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{todir}">
+                            </scp>
+                        </else>
+                    </if>
+                </then>
+            </if>
+            <if>
+                <equals arg1="@{type}" arg2="remote2remote"/>
+                <then>
+                    <if>
+                        <equals arg1="@{fromkeyfile}" arg2=""/>
+                        <then>
+                            <echo>Running SCP command: @{file} TO @{tempfile}</echo>
+                            <scp
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{tempfile}">
+                            </scp>
+                        </then>
+                        <else>
+                            <echo>Running SCP command: @{file} KEY @{fromkeyfile} TO @{tempfile}</echo>
+                            <scp
+                                    keyfile="@{fromkeyfile}"
+                                    trust="true"
+                                    file="@{file}"
+                                    todir="@{tempfile}">
+                            </scp>
+                        </else>
+                    </if>
+                    <if>
+                        <equals arg1="@{tokeyfile}" arg2=""/>
+                        <then>
+                            <echo>Running SCP command: @{tempfile} TO @{todir}</echo>
+                            <scp
+                                    trust="true"
+                                    file="@{tempfile}"
+                                    todir="@{todir}">
+                            </scp>
+                        </then>
+                        <else>
+                            <echo>Running SCP command: @{tempfile} TO @{todir} KEY @{tokeyfile}</echo>
+                            <scp
+                                    keyfile="@{tokeyfile}"
+                                    trust="true"
+                                    file="@{tempfile}"
+                                    todir="@{todir}">
+                            </scp>
+                        </else>
+                    </if>
+                    <delete file="@{tempfile}"/>
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+
+</project>

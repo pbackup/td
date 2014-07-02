@@ -1,0 +1,56 @@
+<project name="project-template-pimcore">
+
+    <description>
+	Custom Tasks for Pimcore 1.4.x Project.
+    </description>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value=""/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <chmod perm="u+rwX" type="both" file="${build.path.src}/website/var/config/system.xml"/>
+        <replaceregexp file="${build.path.src}/website/var/config/system.xml"
+                       match="&lt;database&gt;.*&lt;\/database&gt;"
+                       replace="&lt;database&gt;&lt;adapter&gt;Mysqli&lt;\/adapter&gt;&lt;params&gt;&lt;host&gt;${build.database.host}&lt;\/host&gt;&lt;username&gt;${build.database.username}&lt;\/username&gt;&lt;password&gt;${build.database.password}&lt;\/password&gt;&lt;dbname&gt;${build.database.name}&lt;\/dbname&gt;&lt;port&gt;3306&lt;\/port&gt;&lt;\/params&gt;&lt;\/database&gt;"
+                       flags="s"/>
+
+        <!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src} ${build.path.home}/public_html;
+
+	        chmod u+rwX ${build.path.src}/website/var/config/system.xml;
+	        sed -ni '1h;1!H;$${;g;s/&lt;database&gt;.*&lt;\/database&gt;/&lt;database&gt;&lt;adapter&gt;Mysqli&lt;\/adapter&gt;&lt;params&gt;&lt;host&gt;${build.database.host}&lt;\/host&gt;&lt;username&gt;${build.database.username}&lt;\/username&gt;&lt;password&gt;${build.database.password}&lt;\/password&gt;&lt;dbname&gt;${build.database.name}&lt;\/dbname&gt;&lt;port&gt;3306&lt;\/port&gt;&lt;\/params&gt;&lt;\/database&gt;/g;p;}' ${build.path.src}/website/var/config/system.xml;
+
+	        cd ${build.path.src}; if [ -n '${project.files.chmod}' ]; then chmod -Rf a+rwX ${project.files.chmod}; echo ''; fi;"/>
+	    <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>

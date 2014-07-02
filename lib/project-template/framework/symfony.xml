@@ -1,0 +1,139 @@
+<project name="project-template-symfony">
+
+    <description>
+	Custom Tasks for Symfony 2.x Project.
+    </description>
+
+    <property name="project.files.upload" value=""/>
+    <property name="project.files.ignore" value="app/cache/**/* app/logs/**/*"/>
+    <property name="project.files.chmod" value=""/>
+
+    <target name="database:reset:local" depends=":properties:build" description="Reset database (local)">
+        <symfony task="doctrine:database:drop" args="--force"/>
+        <symfony task="doctrine:database:create"/>
+        <symfony task="doctrine:schema:create"/>
+        <symfony task="init:acl"/>
+    </target>
+
+    <target name="database:reset:remote" depends=":properties:build" description="Reset database (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/app/console doctrine:database:drop --force;
+            php ${build.path.src}/app/console doctrine:database:create;
+            php ${build.path.src}/app/console doctrine:schema:create;
+            php ${build.path.src}/app/console init:acl;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:migrate:local" depends=":properties:build" description="Migrate database to the latest version (local)">
+        <symfony task="doctrine:migrations:migrate" args="--no-interaction"/>
+    </target>
+
+    <target name="database:migrate:remote" depends=":properties:build" description="Migrate database to the latest version (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/app/console doctrine:migrations:migrate --no-interaction;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="database:fixtures:local" depends=":properties:build" description="Load fixtures to database (local)">
+        <symfony task="doctrine:fixtures:load" args=""/>
+    </target>
+
+    <target name="database:fixtures:remote" depends=":properties:build" description="Load fixtures to database (remote)">
+        <var name="cmd" value="
+            php ${build.path.src}/app/console doctrine:fixtures:load;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:clean:local" depends=":properties:build" description="Clean application-source (local)">
+        <!-- Delete build and dist directory trees -->
+        <delete>
+            <fileset dir="${build.path.build}">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${build.path.dist}">
+                <include name="**/*"/>
+            </fileset>
+        </delete>
+
+        <!-- Delete release info -->
+        <delete file="${build.path.src}/RELEASE.txt"/>
+
+        <!-- Clear symfony cache -->
+        <symfony task="cache:clear"/>
+        <symfony task="cache:clear" args="--env=prod"/>
+    </target>
+
+    <target name="app:config:local" depends=":properties:build" description="Configure application">
+        <delete dir="${build.path.home/public_html}"/>
+        <symlink link="${build.path.home}/public_html"
+                 resource="${build.path.src}/web"
+                 overwrite="true"
+                 failonerror="false"/>
+
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="database_host *=.*"
+                       replace="database_host = &quot;${build.database.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="database_name *=.*"
+                       replace="database_name = &quot;${build.database.name}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="database_user *=.*"
+                       replace="database_user = &quot;${build.database.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="database_password *=.*"
+                       replace="database_password = &quot;${build.database.password}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="mailer_host *=.*"
+                       replace="mailer_host = &quot;${build.mail.host}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="mailer_user *=.*"
+                       replace="mailer_user = &quot;${build.mail.username}&quot;"/>
+        <replaceregexp file="${build.path.src}/app/config/parameters.ini"
+                       match="mailer_password *=.*"
+                       replace="mailer_password = &quot;${build.mail.password}&quot;"/>
+
+        <!-- Clear symfony cache -->
+        <symfony task="cache:clear"/>
+        <symfony task="cache:clear" args="--env=prod"/>
+
+        <!-- File permissions -->
+        <chmod perm="a+rwX" type="both">
+            <fileset dir="${build.path.src}">
+                <include name="${project.files.chmod}"/>
+            </fileset>
+        </chmod>
+    </target>
+
+    <target name="app:config:remote" depends=":properties:build" description="Configure application">
+        <var name="cmd" value="
+            rm -Rf ${build.path.home}/public_html;
+            ln -sfn ${build.path.src}/web ${build.path.home}/public_html;
+
+	    sed -i 's/database_host *=.*/database_host = \&quot;${build.database.host}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/database_name *=.*/database_name = \&quot;${build.database.name}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/database_user *=.*/database_user = \&quot;${build.database.username}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/database_password *=.*/database_password = \&quot;${build.database.password}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/mailer_host *=.*/mailer_host = \&quot;${build.mail.host}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/mailer_user *=.*/mailer_user = \&quot;${build.mail.username}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+            sed -i 's/mailer_password *=.*/mailer_password = \&quot;${build.mail.password}\&quot;/' ${build.path.src}/app/config/parameters.ini;
+
+	    php ${build.path.src}/app/console cache:clear;
+            php ${build.path.src}/app/console cache:clear --env=prod;
+
+	    if [ -n '${project.files.chmod}' ]; then cd ${build.path.src}; chmod -Rf a+rwX ${project.files.chmod}; fi;"/>
+        <ssh-cmd command="${cmd}"/>
+    </target>
+
+    <target name="app:config2:local" depends=":properties:build" description="Configure application 2">
+    </target>
+
+    <target name="app:config2:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:local" depends=":properties:build" description="Configure application 3">
+    </target>
+
+    <target name="app:config3:remote" depends=":properties:build" description="Configure application 3">
+    </target>
+
+</project>
