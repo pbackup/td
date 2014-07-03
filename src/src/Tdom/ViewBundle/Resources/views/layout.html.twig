@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+    {% block head %}
+        <head>
+            <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+            <link rel="icon" href="/favicon.ico" type="image/x-icon">
+            {% block meta %}
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            {% endblock meta %}
+            <title>{% block title %} {{ "Welcome to tabledom - Login" | trans }} {% endblock %}</title>
+            {% block stylesheets %}
+                <link type="text/css" rel="stylesheet" href={{asset('bundles/tdomview/css/bootstrap.css')}} />
+                <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+                <link type="text/css" rel="stylesheet" href={{asset('bundles/tdomview/css/style.css')}} />
+                <link type="text/css" rel="stylesheet" href={{asset('bundles/tdomview/css/bootstrap-multiselect.css')}} />
+                <link type="text/css" rel="stylesheet" href={{asset('bundles/tdomview/css/bootstrap-select.css')}} />
+            {% endblock stylesheets %}
+            
+            {% block jslink %}
+                <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+                <!-- Include all compiled plugins (below), or include individual files as needed -->
+                <script src="{{ asset('bundles/tdomview/js/jQuery.blockUI.js') }}"></script>
+                <script src="{{ asset('bundles/tdomview/js/bootstrap.min.js') }}"></script>
+                <script src="{{ asset('bundles/tdomview/js/bootstrap-select.js') }}"></script>
+                <script src="{{ asset('bundles/tdomview/js/view-script.js') }}"></script>
+            {% endblock jslink %}
+          </head>
+    {% endblock head %}
+
+    {% block body %}
+        <body>
+            <div class="non-responsive wrapper">
+                {% block header %}
+                     {% include 'TdomViewBundle::header.html.twig' %}
+                {% endblock header %}
+                {% block message %} {% endblock message %}
+
+                {% block content %}
+
+                {% endblock content %}
+
+                {% block footer %}
+                    {% include 'TdomViewBundle::footer.html.twig' %}
+                    {% include 'TdomViewBundle::script.html.twig' %}
+                {% endblock footer %}
+            </div>
+        </body>
+   {% endblock body %}
+</html>
+

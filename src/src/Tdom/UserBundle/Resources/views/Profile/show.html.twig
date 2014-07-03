@@ -1,0 +1,10 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+{%  block message %}
+   <script> window.location = "{{ path('fos_user_profile_edit') }}"; </script>
+{%  endblock %}
+
+{% block content %}
+    {% block fos_user_content %}
+    {% include "FOSUserBundle:Profile:show_content.html.twig" %}
+    {% endblock fos_user_content %}
+{%  endblock %}

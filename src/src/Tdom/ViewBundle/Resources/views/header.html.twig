@@ -1,0 +1,56 @@
+<div class="navbar-bg">
+    <div class="navbar navbar-default navbar-tabledom">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{path('gamerFind')}}">TABLEDOM <small style="font-size:12px">Alpha</small></a>
+            </div>
+            <div class="navbar-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                {%  set _route = app.request.attributes.get('_route') %}
+                {% if app.user  %}
+                    <li  {% if _route == 'gamerFind' %} class="active" {% endif %} ><a href="{{path('gamerFind')}}"  >{{ "FIND" | trans}}</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            {{ "CREATE" |trans }} <b class="caret" style="color: darkorange"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li> <a href="#" class="menu-disabled disabled"> Group </a> </li>
+                            <li> <a href="#" class="menu-disabled disabled"> Event </a> </li>
+                            <li> <a href="#" class="menu-disabled disabled"> Tournament </a> </li>
+                        </ul>
+                    </li>
+                    <li {% if _route == 'socialiseAction' %} class="active" {% endif %} ><a href="{{ path('socialiseAction') }}">{{ "SOCIALIZE" | trans }}</a></li>
+                    <li {% if _route == 'fos_user_profile_edit' or _route == 'gameMygames' or _route == 'fos_user_change_password' %} class="active dropdown" {% else %} class="dropdown"  {% endif %} >
+                        <a href="#" class="dropdown-toggle user-profile" data-toggle="dropdown" >
+                            {% if app.user.avatar %}
+                                {%  set img =  asset('uploads/'~app.user.avatar) %}
+                                <img src="{{ web_image(img).resize(100) }}" class="profile_picture" />
+                            {% else %}
+                                <img src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" class="profile_picture" />
+                            {% endif %}
+                            {{app.user.nickName}} <b class="caret" style="color: darkorange"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ path('fos_user_profile_edit') }}">{{"My profile" | trans }}</a></li>
+                            <li><a href="{{path("gameMygames")}}">{{"My games" | trans }}</a></li>
+                            <li class="divider"></li>
+                            <li><a href="{{ path('fos_user_change_password') }}">{{"Change password" | trans }}</a></li>
+                            <li><a href="{{ path('fos_user_security_logout') }}">{{"Logout" | trans }}</a></li>
+                        </ul>
+                    </li>
+                 {% else %}
+                    {% set _routeArr = {0:'fos_user_security_login', 1:'homepage'} %}
+                    {% if _route not in _routeArr %}
+                     <li><a href="{{path('fos_user_security_login')}}"  >{{ "LOGIN" | trans}}</a></li>
+                     <li {% if _route == 'fos_user_registration_register' %} class="active" {% endif %} ><a href="{{ path('fos_user_registration_register') }}">{{ "REGISTER" | trans }}</a></li>
+                    {% endif %}
+                {%  endif  %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

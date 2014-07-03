@@ -1,0 +1,91 @@
+<div class="content_bg">
+    <div class="col-lg-8 col-lg-offset-2">
+        <div class="content-details">
+            <h3 class="content-details-title"> {{ "My Profile" | trans }} </h3>
+            <form class="form-vartical" action="{{ path('fos_user_profile_edit') }}" {{ form_enctype(form) }} method="POST">
+                <div class="col-sm-4 nopadding">
+                    <div class="register-form">
+                        <div class="form-group">
+                            <label class="control-label" for="fos_user_registration_form_nickName"> {{ "Nick Name" | trans }} *</label>
+                            <input type="text" class="form-control" disabled="" value="{%  if app.user %} {{  app.user.nickName }} {% endif %}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="fos_user_registration_form_fullName"> {{ "Full Name" | trans }} *</label>
+                            {{ form_widget(form.fullName, {'attr': {'class' : 'form-control'} }) }}
+                            <span class="form-error"> {{ form_errors(form.fullName) }} </span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="fos_user_registration_form_email">{{ "E-mail" | trans }} *</label>
+                            <input type="text" class="form-control" disabled="" value="{%  if app.user %} {{  app.user.email }} {% endif %}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="birthday"> {{ "Birthday" | trans}} </label>
+                            {{ form_widget(form.birthDay, {'attr': {'class' : 'form-control'} }) }}
+                            <span class="form-error"> {{ form_errors(form.birthDay) }} </span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="country">{{ "Country" | trans }} </label>
+                            {{ form_widget(form.country, {'attr': {'class' : 'form-control form_country'} }) }}
+                            <span class="form-error"> {{ form_errors(form.country) }} </span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="city">{{"City" | trans }}</label>
+                            {{ form_widget(form.city, {'attr': {'class' : 'form-control form_city'} }) }}
+                            <span class="form-error"> {{ form_errors(form.city) }} </span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="desc">{{ "Description" | trans }}</label>
+                            {{ form_widget(form.description, {'attr': {'class' : 'form-control'} }) }}
+                            <span class="form-error"> {{ form_errors(form.description) }} </span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="password">{{"Current Password" | trans }} </label>
+                            {{ form_widget(form.current_password, {'attr':{'class': 'form-control'}}) }}
+                            <span class="form-error"> {{ form_errors(form.current_password) }} </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-8 nopadding">
+                    <div class="right-panel">
+                        <div id="map_canvas"></div>
+                        <div class="map_footer">
+                            <div style="padding-bottom: 5px"><i class="fa fa-location-arrow"></i> {{ "Set your home by clicking on the map." | trans }}</div>
+                            <div class="nav navbar-nav">
+                                <div class="map_loc"></div>
+                                <input type="hidden" value="" id="user_home" />
+                            </div>
+                            <div class="nav navbar-right">
+                                <a href="#" class="btn btn-danger" id="sethome" >{{ "Locate home town" | trans }}</a>
+                                {{ form_widget(form.location, {'attr':{'class': 'form_location'}}) }}
+                                <span class="form-error"> {{ form_errors(form.location) }} </span>
+                            </div>
+                        </div>
+                        <div class="profile-picture">
+                            <div class="form-group">
+                                <div id="thumbnail" style="width:220px">
+                                    {% if app.user.avatar %}
+                                        {%  set img =  asset('uploads/'~app.user.avatar) %}
+                                        <img src="{{ web_image(img).resize(300) }}" class="img-responsive" />
+                                    {% else %}
+                                        <img  class="img-responsive drop-area" src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" />
+                                    {% endif %}
+                                </div>
+                                {{ form_widget(form.file, {'attr': {'class' : 'form-control'} }) }}
+                                <label id="upload" class="btn btn-danger upload-btn">Change profile picture</label>
+                                <span class="form-error"> {{ form_errors(form.file) }} </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both">
+                    <div class="form-group">
+                        <input class="btn btn-danger" id="desc" value="{{"Save Changes" | trans }}" type="Submit" />
+                    </div>
+                </div>
+                {{ form_rest(form) }}
+            </form>
+        </div>
+    </div>
+</div>
+
+

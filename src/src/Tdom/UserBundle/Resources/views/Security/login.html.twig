@@ -1,0 +1,63 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+
+{%  block message %}
+    {%  if error %}
+        <div class="alert alert-dismissable alert-danger col-lg-8 col-lg-offset-2">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+             {{ error | trans }}
+        </div>
+   {%  endif  %}
+{%  endblock %}
+
+{% block content %}
+  {% block fos_user_content %}
+      <div class="content_bg">
+          <div>
+              <div class="col-lg-8 col-lg-offset-2" style="overflow: hidden">
+                  <div class="col-sm-6 col-sm-offset-3">
+                      <div >
+                          <form class="form-horizontal" action="{{ path("fos_user_security_check") }}" method="post">
+                              <div class="login-screen" style="overflow: hidden">
+                                  <div class="logo">
+                                      <img class="img-responsive" src="{{ asset('bundles/tdomview/images/tabledom-logo.png') }}" />
+                                  </div>
+                                  <div class="slogan"> <h3>{{ "Uniting tabletop gamers with a click." | trans }}</h3> </div>
+                                  <div class="col-sm-12 nopadding" style="overflow: hidden">
+                                      <div class="form-group">
+                                          <label for="inputEmail" class="col-sm-3 control-label nopadding-right" >Email Address</label>
+                                          <div class="col-sm-5 nopadding-right">
+                                              <input class="form-control" id="inputEmail" type="email" placeholder="Email" name="_username" value="{{ last_username }}" >
+                                          </div>
+                                      </div>
+                                      <div class="form-group">
+                                          <label for="password" class="col-sm-3  control-label nopadding-right" > Password</label>
+                                          <div class="col-sm-5 nopadding-right">
+                                              <input class="form-control" id="password" name="_password" required="required" placeholder="Password" type="password">
+                                              <a href="{{ path('fos_user_resetting_request') }}" style="float:right"><strong> {{ "Forgot password?" | trans }} </strong> </a>
+                                          </div>
+
+                                      <div class="form-group"></div>
+                                          <label  class="col-sm-3  control-label nopadding-right"  ></label>
+                                          <div class="col-sm-5  nopadding-right">
+                                              <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+                                              <input type="submit" class="btn btn-danger btn-sm" style="width:100%" value="{{ "Login" | trans }}" />
+                                          </div>
+                                      </div>
+                                      <div class="form-group">
+                                          <label  class="col-sm-3  control-label nopadding-right" ></label>
+                                          <div class="col-sm-5 nopadding-right">
+                                              <a href="{{ path('fos_user_registration_register') }}"><b>{{ "Registration" |trans }} &gt </b></a> <br />
+                                              <a href="{{ path('gamerFind') }}">{{ "Continue without registration" | trans }}&gt </a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  {% endblock fos_user_content %}
+{% endblock %}
+

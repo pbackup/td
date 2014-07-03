@@ -1,0 +1,27 @@
+<div class="row games-list nopadding">
+    {% for category in categories %}
+        {% set style = "" %}
+        {% if loop.index == 1 %}
+            {% set style = "padding-left: 0 !important;" %}
+        {% elseif loop.index % 4 == 0 %}
+           {%  set style = "padding-right: 0!important;" %}
+        {% elseif loop.index % 5 == 0 %}
+            {%  set style = "padding-left: 0!important;" %}
+        {% endif %}
+        <div class="col-sm-3 nopadding" style="{{ style }}">
+          <h4>
+                {% if category.icon %}
+                   <img  class="img-responsive drop-area" src="{{ asset('uploads/category/'~category.icon) }}" />
+                {% endif %}
+                {{ category.name }}
+          </h4>
+          <ul class="games-item list-group" id="cat_{{ category.id }}_id">
+                {% if category.games %}
+                    {% for game in category.games %}
+                        {% include 'TdomGameBundle:Game:Partials/item.html.twig' %}
+                    {% endfor %}
+                {% endif %}
+          </ul>
+        </div>
+    {% endfor %}
+</div>

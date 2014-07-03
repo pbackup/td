@@ -1,0 +1,33 @@
+{% extends "FOSUserBundle::layout.html.twig" %}
+
+{% block title %}{{ "Registration" |trans }} {% endblock title  %}
+
+{%  block message %}
+    {% for type, messages in app.session.flashbag.all() %}
+        {% for key, message in messages %}
+            <div style="margin-bottom: 20px; overflow: hidden" class="col-lg-8 col-lg-offset-2">
+                <div class="alert alert-dismissable alert-success flash-{{ type }}">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    {{ message|trans({}, 'FOSUserBundle') }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {%  set errors = form_errors(form.file) %}
+
+    {% if errors %}
+        <div style="margin-bottom: 20px; overflow: hidden" class="col-lg-8 col-lg-offset-2">
+            <div class="alert alert-dismissable alert-danger">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <span class="form-error"> {{ errors | raw }} </span>
+            </div>
+        </div>
+    {% endif %}
+
+{%  endblock %}
+
+{% block content %}
+    {% block fos_user_content %}
+            {% include "FOSUserBundle:User:registration.html.twig" %}
+    {% endblock fos_user_content %}
+{%  endblock %}

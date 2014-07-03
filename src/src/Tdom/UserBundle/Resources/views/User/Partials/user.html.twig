@@ -1,0 +1,13 @@
+{% set isTarget = targetUser is defined and targetUser and targetUser.id == user.id  %}
+<a href="{{ path('socialiseAction', {'userId' : user.id }) }}" id="user_{{user.id}}" class="list-group-item user-profile {% if isTarget %} active {% endif %}">
+    {% if user.avatar %}
+        {%  set img =  asset('uploads/'~user.avatar) %}
+        <img src="{{ web_image(img).resize(100) }}" class="profile_picture" />
+    {% else %}
+        <img src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" class="profile_picture" />
+    {% endif %}
+    <span class="name" > {{ user.nickName }} </span>
+    {% if user.totalUnreadMessage %}
+        <span class="badge" {% if isTarget %} style="display: none" {% endif %}>{{ user.totalUnreadMessage }}</span>
+    {% endif %}
+</a>

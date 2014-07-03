@@ -1,0 +1,6 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+{% block field%}
+    {% if object.avatar %}
+        <a href="{{ path('userProfile', {'userId' : object.id }) }}" target="_blank" title="View profile"> {{ object.nickName }} </a>
+    {% endif %}
+{% endblock %}

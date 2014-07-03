@@ -1,0 +1,14 @@
+{%  set _route = app.request.attributes.get('_route') %}
+{% set _routeArr = {0:'fos_user_security_login', 1:'homepage'} %}
+<div class="footer" id="tdom_footer">
+    <div class="footer_inner">
+        <div class="col-lg-8 col-lg-offset-2" style="overflow: hidden">
+            <div class="nav navbar-nav">
+                <a href="#">&copy;{{ "Tabledom 2014" | trans }}</a>
+            </div>
+            <div class="nav navbar-right">
+                <a href="mailto:info@tabledom.com">{{ "Send us feedback" | trans }}</a>
+            </div>
+        </div>
+    </div>
+</div>

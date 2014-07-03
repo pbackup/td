@@ -1,0 +1,4 @@
+services:
+    tdom.game.manager:
+        class: Tdom\GameBundle\Manager\GameManager
+        arguments: ['@doctrine.orm.entity_manager', '@security.context', '@session', '@monolog.logger']

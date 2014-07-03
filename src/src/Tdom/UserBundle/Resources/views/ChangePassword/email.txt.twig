@@ -1,0 +1,18 @@
+{% block subject %}
+{% autoescape false %} 
+    {{ "Change password confirmation" }}
+{% endautoescape %}
+{% endblock %}
+{% block body_text %}
+{% autoescape false %}
+<pre style="font-size: 12px; font-family: arial, sans-serif">
+Dear {{ user.nickName }},
+Please, authenticate your recent change of password, thank you!
+<a href="{{ url("fos_user_security_login") }}" >{{ url("fos_user_security_login") }}</a>
+
+With regards
+Tabledom Administrator
+</pre>
+{% endautoescape %}
+{% endblock %}
+{% block body_html %}{% endblock %}

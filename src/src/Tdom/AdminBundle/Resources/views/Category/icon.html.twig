@@ -1,0 +1,8 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+{% block field%}
+    <div>
+        {% if object.icon %}
+            <img src="{{ asset('uploads/category/'~object.icon) }}"  class="img-responsive" />
+        {% endif %}
+    </div>
+{% endblock %}

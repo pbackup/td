@@ -1,0 +1,13 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock stylesheets %}
+
+{% block jslink %}
+    {{ parent() }}
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry&sensor=false"></script>
+    <script src="{{ asset('bundles/tdomview/js/bootstrap-multiselect.js') }}"></script>
+    <script src="{{ asset('bundles/tdomgame/js/game-script.js') }}"></script>
+{% endblock jslink %}
+

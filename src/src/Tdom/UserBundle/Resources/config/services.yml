@@ -1,0 +1,22 @@
+services:
+    tabledom_user.registration.form.type:
+        class: Tdom\UserBundle\Form\RegisterType
+        arguments: [%fos_user.model.user.class%]
+        tags:
+            - { name: form.type, alias: tdom_user_registration }
+
+    my_user.profile.form.type:
+        class: Tdom\UserBundle\Form\ProfileFormType
+        arguments: [%fos_user.model.user.class%]
+        tags:
+            - { name: form.type, alias: tdom_user_profile }
+
+    tdom_user.age:
+        class: Tdom\UserBundle\Validator\AgeValidator
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - {name: validator.constraint_validator, alias: validator.age}
+
+    tdom.user.manager:
+        class: Tdom\UserBundle\Manager\UserManager
+        arguments: ['@doctrine.orm.entity_manager', '@security.context', '@monolog.logger']

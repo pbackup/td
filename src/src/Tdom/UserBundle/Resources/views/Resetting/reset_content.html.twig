@@ -1,0 +1,20 @@
+<form class="form-vartical" action="{{ path('fos_user_resetting_reset', {'token': token}) }}" {{ form_enctype(form) }} method="POST">
+    <div class="col-sm-4 nopadding">
+        <div class="register-form">
+            <div class="form-group">
+                <label class="control-label" for="fos_user_registration_form_nickName"> {{ "New password" | trans }} </label>
+                {{ form_widget(form.new.first, {'attr': {'class' : 'form-control'} }) }}
+                <span class="form-error"> {{ form_errors(form.new.first) }} </span>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="fos_user_registration_form_nickName"> {{ "Confirm Password" | trans }} </label>
+                {{ form_widget(form.new.second, {'attr': {'class' : 'form-control'} }) }}
+                <span class="form-error"> {{ form_errors(form.new.second) }} </span>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-danger" value="{{ 'resetting.reset.submit'|trans({}, 'FOSUserBundle') }}" />
+            </div>
+        </div>
+    </div>
+    {{ form_rest(form) }}
+</form>

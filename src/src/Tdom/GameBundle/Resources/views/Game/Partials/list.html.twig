@@ -1,0 +1,14 @@
+{% for game in games %}
+    <li>
+        <span class="fa fa-check-square dtn-danger list-action" style="float: left"  data-action="{{ path("userAddGame", {'id' : game.id}) }}"> &nbsp;</span>
+        {% if game.category.icon %}
+            <img  class="img-responsive drop-area" src="{{ asset('uploads/category/'~game.category.icon) }}" style="float: left; height:18px"/>
+        {% endif %}
+         &nbsp; {{ game.name }}
+    </li>
+ {% else %}
+     <li>
+         <labe style="display: block">{{ "No result! " }}</labe>
+         <button type="button" class="btn btn-danger btn-xs" id="new_games_action" >Add </button> <b> {{ q }} </b> as a new game?
+     </li>
+{%  endfor %}

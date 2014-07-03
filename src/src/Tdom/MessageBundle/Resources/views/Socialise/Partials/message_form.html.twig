@@ -1,0 +1,28 @@
+<form action="{{ path('messageSend',{'userId': targetUser.id })}}" id="message_form" methos="post" >
+    <div class="user-message-list">
+        <div class="message-list-item" style="overflow: hidden">
+            <div class="col-md-1">
+                {% if app.user.avatar %}
+                    {%  set img =  asset('uploads/'~app.user.avatar) %}
+                    <img src="{{ web_image(img).resize(150) }}" class="profile_picture" />
+                {% else %}
+                    <img src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" class="profile_picture" />
+                {% endif %}
+            </div>
+            <div class="col-md-11" style="overflow: hidden">
+                <div class="message-list-item-text">
+                    {{ form_widget(form.body, {'attr': {'class' : 'form-control message_field'} }) }}
+                    <span class="form-error"> {{ form_errors(form.body) }} </span>
+                </div>
+                <div class="pull-right" style="padding:10px 5px 0px 0px">
+                    <a href="#" class="btn btn-danger" id="send_message"> {{ "Send" | trans }}</a>
+                    {% if is_granted('ROLE_SUPER_ADMIN') %}
+                        <a href="{{ path('messageSendToAll', {'userId':targetUser.id}) }}" class="btn btn-danger" id="send_message_all"> {{ "Send All" | trans }}</a>
+                    {% endif %}
+                    <a href="{{ path('refreshMessage', {'userId': targetUser.id }) }}" style="color:#F57A00" id="refresh_button" > {{ "Refresh" | trans }} </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ form_rest(form) }}
+</form>

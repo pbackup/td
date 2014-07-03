@@ -1,0 +1,59 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+{% block title %}TdomViewBundle:Home:index{% endblock %}
+{% block active %} active {% endblock active %}
+
+
+{%  block message %}
+    {% for type, messages in app.session.flashbag.all() %}
+        {% for key, message in messages %}
+            <div class="flash-{{ type }}">
+                {{ message|trans({}, 'FOSUserBundle') }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+{%  endblock %}
+
+{% block content %}
+    <div class="content_bg">
+        <div>
+            <div class="col-lg-8 col-lg-offset-2">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <div style="padding: 6% 0%">
+                        <form class="form-horizontal" action="{{ path("fos_user_security_check") }}" method="post">
+                            <div class="logo" style="padding-bottom: 10px">
+                                <img class="img-responsive" src="{{ asset('bundles/tdomview/images/Tabledom_logo.png') }}" />
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail" class="col-lg-4 control-label">Email Address</label>
+                                <div class="col-lg-7">
+                                    <input class="form-control" id="inputEmail" type="email" name="_username" value="" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="col-lg-4 control-label">Password</label>
+                                <div class="col-lg-7">
+                                    <input class="form-control" id="password" name="_password" required="required" placeholder="password" type="password">
+                                    <a href="">Forgot password?</a>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-lg-4 control-label"></label>
+                                <div class="col-lg-7">
+                                     <input type="hidden" name="_csrf_token" value="" />
+                                     <input type="submit" class="btn btn-danger btn-sm" style="width:100%" value="Login" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label  class="col-lg-4 control-label"></label>
+                                <div class="col-lg-7">
+                                    <a href="">Registration &gt</a> <br />
+                                    <a href="">Continue without registration &gt</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

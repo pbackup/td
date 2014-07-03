@@ -1,0 +1,97 @@
+{% extends json is not defined ? "TdomViewBundle::layout.html.twig" : 'TdomViewBundle::ajax.html.twig' %}
+{% block title %}{{ user.nickName }}{% endblock %}
+{% block content %}
+{% if json is not defined %}
+    <div class="content_bg">
+    <div class="col-lg-8 col-lg-offset-2">
+{% endif %}
+    <div class="content-details">
+        <div class="row-fluid user-info-details form-horizontal" style="overflow: hidden">
+            <div class="col-sm-8 nopadding">
+                <div class="list-group">
+                    <label class="col-sm-2 nopadding">{{ "Real name" | trans }}</label>
+                    <div class="col-sm-10">
+                        {{ user.fullName }}
+                    </div>
+                </div>
+
+                <div class="list-group">
+                    <label class="col-sm-2 nopadding">{{ "E-mail" | trans }}</label>
+                    <div class="col-sm-10">
+                       {% if app.user %}
+                           {{ user.email }}
+                       {% else %}
+                           <a href="{{ path('fos_user_security_login') }}">Email address is available for registered users</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="list-group">
+                    <label class="col-sm-2 nopadding">{{ "Age" | trans }}</label>
+                    <div class="col-sm-10">
+                       {{ user.age }} {{ "years" | trans }}
+                    </div>
+                </div>
+                <div class="list-group">
+                    <label class="col-sm-2 nopadding">{{ "Location" | trans }}</label>
+                    <div class="col-sm-10">
+                        {{ user.city }}, {{ user.countryFullName }}
+                    </div>
+                </div>
+                <div class="list-group">
+                    <label class="col-sm-2 nopadding">{{ "Description" | trans }}</label>
+                    <div class="col-sm-10">
+                        {{ user.description }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 nopadding">
+                <div class="profile-picture nopadding">
+                    {% if user.avatar %}
+                        {%  set img =  asset('uploads/'~user.avatar) %}
+                        <img src="{{ web_image(img).resize(300) }}" class="img-responsive" />
+                    {% else %}
+                        <img  class="img-responsive drop-area" style="width:200px; height: 200px" src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" />
+                    {% endif %}
+                </div>
+            </div>
+            <div class="list-group" style="">
+                <div class="col-lg-10 nopadding">
+                    {% if json is defined %}
+                        <a href="#" class="btn btn-danger" id="showonmap"> {{ "Show on map" |trans }} </a>
+                    {% endif %}
+                    {% if userConnect %}
+                        <a href="{{ path('userRemoveContact', {'userId' : user.id}) }}" class="btn btn-danger"  id="addcontacts" >{{ "Remove from my contacts" | trans }} </a>
+                    {% else %}
+                        <a href="{{ path('userAddContact', {'userId' : user.id}) }}"  class="btn btn-danger" data-login="{% if app.user %}{{ app.user.id }}{% endif %}"  id="addcontacts" >{{ "Add to my contacts" | trans }} </a>
+                    {% endif %}
+                    <a href="{{ path('socialiseAction', {'userId' : user.id }) }}" class="btn btn-danger" data-login="{% if app.user %}{{ app.user.id }}{% endif %}" id="send_message" > {{ "Send message" | trans }} </a>
+                </div>
+            </div>
+        </div>
+        <div class="user-games">
+            {% include 'TdomGameBundle:Game:Partials/games.html.twig' %}
+        </div>
+    </div>
+ {% if json is not defined %}
+     </div>
+     </div>
+{%  endif %}
+    <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    {{ "Confirmation" | trans }}
+                </div>
+                <div class="modal-body">
+                    {{ 'Please login or register.' | trans }}
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('fos_user_security_login') }}" class="btn btn-danger danger">{{ "Login" | trans}}</a>
+                    <a href="{{ path('fos_user_registration_register') }}" class="btn btn-danger danger">{{ "Register" | trans}}</a>
+                    <button type="button" onclick="jQuery('#confirm-modal').modal('hide')" class="btn btn-default" >{{ "Cancel" | trans }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

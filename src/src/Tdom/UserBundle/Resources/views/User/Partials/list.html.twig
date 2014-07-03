@@ -1,0 +1,15 @@
+{% for user in connectUsers %}
+<li>
+   <a href="{{ path("socialiseAction", {'userId' : user.id}) }}" style="display: block; overflow: hidden">
+        {% if user.avatar %}
+            {%  set img =  asset('uploads/'~user.avatar) %}
+            <img src="{{ web_image(img).resize(150) }}" class="profile_picture" />
+        {% else %}
+            <img src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}"  class="profile_picture" />
+        {% endif %}
+        <span class="name"> {{ user.nickName }} </span>
+   </a>
+</li>
+{% else %}
+    <li> <span style="padding-left: 10px"> {{ "No result found!" }}</span> </li>
+{% endfor %}

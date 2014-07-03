@@ -1,0 +1,8 @@
+<li class="game list-group-item" style="background:{{ game.category.color }};" title="{{ game.fullName }}">
+    <span class="pull-left">{{ game.name }} &nbsp; </span>
+    {% if isPublic is not defined %}
+        <span class="fa fa-times-circle badge badge-info remove-action" style="padding-bottom:1px" data-action="{{ path("userRemoveGame", {'id' : game.id}) }}"> </span>
+    {% else %}
+        &nbsp;
+    {% endif %}
+</li>

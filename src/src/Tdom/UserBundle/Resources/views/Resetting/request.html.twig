@@ -1,0 +1,27 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+
+{%  block message %}
+    {% for type, messages in app.session.flashbag.all() %}
+        {% for key, message in messages %}
+            <div style="margin-bottom: 20px; overflow: hidden" class="col-lg-8 col-lg-offset-2">
+                <div class="alert alert-dismissable alert-success flash-{{ type }}">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    {{ message|trans({}, 'FOSUserBundle') }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+{%  endblock %}
+
+{% block content %}
+    {% block fos_user_content %}
+    <div class="content_bg">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="content-details">
+                <h3 class="content-details-title"> {{ "Reset password request" | trans }} </h3>
+                {% include "FOSUserBundle:Resetting:request_content.html.twig" %}
+            </div>
+        </div>
+    </div>
+    {% endblock fos_user_content %}
+{%  endblock %}

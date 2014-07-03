@@ -1,0 +1,4 @@
+services:
+    tdom.message.manager:
+        class: Tdom\MessageBundle\Manager\MessageManager
+        arguments: ['@doctrine.orm.entity_manager', '@security.context', '@monolog.logger', '@mailer','@tdom.user.manager']

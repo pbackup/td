@@ -1,0 +1,72 @@
+{% extends "TdomGameBundle::layout.html.twig" %}
+{% block title %}TdomViewBundle:Home:index{% endblock %}
+{% block active %} active {% endblock active %}
+{% block content %}
+    <div class="content_bg">
+        <div>
+            <div class="col-lg-8 col-lg-offset-2">
+                <div class="">
+                     <div class="searching-form">
+                         <form class="form-horizontal">
+                             <div class="form-group nopadding">
+                                <div class="col-lg-12 nopadding">
+                                     <div class="col-sm-3" style="padding-left: 0">
+                                         <select class="form-control"  id="select">
+                                             <option>Category</option>
+                                             <option>Board Games </option>
+                                             <option>Card Games </option>
+                                             <option>Miniature Games</option>
+                                             <option>Playing games</option>
+                                         </select>
+                                     </div>
+                                     <div class="col-sm-3" style="padding-left: 0">
+                                         <select multiple="" id="game_selectbox" class="form-control">
+                                             <option>Piksels</option>
+                                             <option>Hobo Bob</option>
+                                             <option>Dragon coins</option>
+                                             <option>Flue</option>
+                                             <option>Denudation</option>
+                                         </select>
+                                     </div>
+                                    <div class="col-sm-3" style="padding-left: 0">
+                                        <select class="form-control" disabled=""  id="select">
+                                            <option>Type</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3" style="padding-right: 0">
+                                        <div class="navbar-right">
+                                            <div class="form-group">
+                                                <a href="#" class="btn" >Filter Reset</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                         </form>
+                     </div>
+                      <div id="map_canvas" style="height: 400px">
+
+                      </div>
+
+                    <div class="modal" id="my_modal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h4 class="modal-title">Modal title</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p>One fine body…</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

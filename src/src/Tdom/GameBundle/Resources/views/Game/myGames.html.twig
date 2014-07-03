@@ -1,0 +1,30 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+{% block title %}{{ "My games" |trans }} {% endblock title  %}
+{% block content %}
+    <div class="content_bg">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="content-details">
+                <h3 class="content-details-title"> My Games </h3>
+                <div class="mygame-seach-bar">
+                    <div class="col-md-5 nopadding" style="padding-top: 10px !important">
+                        <form class="navbar-left" role="search">
+                            <div class="input-group">
+                                <input class="form-control" id="game_search" placeholder="Search new games" type="text">
+                                <span class="input-group-addon btn-default"><i class="fa fa-search"></i></span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-7 nopadding" style="padding-top: 10px !important">
+                        <div class="navbar-right">
+                            <div class="form-group">
+                                <a href="#add_game" class="btn btn-danger" data-toggle="modal" >{{ "Add new game" | trans }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% include 'TdomGameBundle:Game:Partials/games.html.twig' %}
+                {% include 'TdomGameBundle:Game:Partials/popup_form.html.twig' %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

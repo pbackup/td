@@ -1,0 +1,50 @@
+{% extends "TdomMessageBundle::layout.html.twig" %}
+
+{% block title %} {{ "TABLEDOM::Socialise" | trans }} {% endblock %}
+{% block content %}
+<div class="content_bg">
+
+    <div class="col-lg-8 col-lg-offset-2">
+        <div class="content-details nopadding socialise" style="margin-bottom: 35px !important">
+            <div class="col-sm-3 nopadding">
+                <h4>{{ "Connect" | trans }} <i class="fa fa-bullhorn" style="padding-top: 3px;"></i></h4>
+                <div class="connect-list">
+                    <ul class="nav nav-tabs" style="margin-bottom: 10px;">
+                        <li class="active col-sm-4 nopadding"><a href="#user" data-toggle="tab"><i class="fa fa-user fa-1x"></i></a></li>
+                        <li class="disabled col-sm-4 nopadding"><a href="#group" ><i class="fa fa-group fa-1x"></i></a></li>
+                        <li class="disabled col-sm-4 nopadding"><a href="#event" style="margin-right: 0;"> <i class="fa fa-calendar"></i> </a></li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade active in" id="user">
+                            <form class="navbar-left" role="search">
+                                <div class="input-group connect-search">
+                                    <input class="form-control" AUTOCOMPLETE="off" id="contact_search" placeholder="{{ 'Search contacts' | trans }}" type="text">
+                                    <span class="input-group-addon btn-default"><i class="fa fa-search"></i></span>
+                                </div>
+                            </form>
+                            <div class="connect-users">
+                                <div class="connect-users-list">
+                                    <div class="list-group" id="user_connect_list">
+                                          {% include 'TdomMessageBundle:Socialise:Partials/user_connect.html.twig' %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="group">
+                            {{ "Group" | trans }}
+                        </div>
+                        <div class="tab-pane fade" id="event">
+                            {{ "Event" | trans }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Right panel #}
+            <div class="col-sm-9 nopadding right-panel">
+                {% include 'TdomMessageBundle:Socialise:Partials/message_list.html.twig' %}
+            </div>
+        </div>
+    </div>
+ </div>
+{% endblock content %}

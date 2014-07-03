@@ -1,0 +1,24 @@
+services:
+    tdom_admin.admin.game:
+        class: Tdom\AdminBundle\Admin\GameAdmin
+        arguments: [~, Tdom\AdminBundle\Entity\Game, TdomAdminBundle:GameAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: admin, label: Game}
+
+    tdom_admin.admin.user:
+        class: Tdom\AdminBundle\Admin\UserAdmin
+        arguments: [~, Tdom\UserBundle\Entity\User, TdomAdminBundle:UserAdmin]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: admin, label: User}
+
+    tdom_admin.admin.category:
+        class: Tdom\AdminBundle\Admin\Category
+        arguments: [~, Tdom\AdminBundle\Entity\Category, TdomAdminBundle:Category]
+        tags:
+            - {name: sonata.admin, manager_type: orm, group: admin, label: Category}
+     
+    tdom_admin.admin.game.unique:
+        class: Tdom\AdminBundle\Validator\UniqueValidator
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - {name: validator.constraint_validator, alias: validator.unique}

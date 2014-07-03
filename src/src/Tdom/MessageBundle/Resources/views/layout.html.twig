@@ -1,0 +1,11 @@
+{% extends "TdomViewBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock stylesheets %}
+
+{% block jslink %}
+    {{ parent() }}
+    <script src="{{ asset('bundles/tdommessage/js/message-script.js') }}"></script>
+{% endblock jslink %}
+

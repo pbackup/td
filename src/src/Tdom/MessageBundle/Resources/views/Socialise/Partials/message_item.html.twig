@@ -1,0 +1,31 @@
+{% if userMessages %}
+  {% for userMessage in userMessages %}
+    <div class="user-message-list">
+        <div class="message-list-item" >
+            <div class="col-md-1">
+                {% if userMessage.message.user.avatar %}
+                    {%  set img =  asset('uploads/'~userMessage.message.user.avatar) %}
+                    <img src="{{ web_image(img).resize(150) }}" class="profile_picture" />
+                {% else %}
+                    <img src="{{ asset('bundles/tdomuser/images/default_avatar.jpeg') }}" class="profile_picture" />
+                {% endif %}
+            </div>
+            <div class="col-md-11" style="overflow: hidden">
+                <div class="message-list-item-user">
+                    <strong class="pull-left"> {{ userMessage.message.user.nickName }} </strong>
+                    <small class="pull-right" style="padding-right:3px"> {{  userMessage.message.createdAt.format('d/m/Y g:ia') }} </small>
+                </div>
+                <div class="message-list-item-text">
+                    {{ userMessage.message.body }}
+                </div>
+            </div>
+        </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<script>
+    jQuery(document).ready(function() {
+        scrollToDown(document.getElementById('message_list'));
+    });
+</script>

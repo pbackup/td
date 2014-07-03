@@ -1,0 +1,9 @@
+<script>
+    var settings = new Object();
+    settings.gameSearchAjaxUrl = "{{ path('gameSearch') }}";
+    settings.changeCategoryAjaxUrl = "{{ path('changeCategoryAction') }}";
+    settings.mapData = {};
+    settings.ajaxLoadingImg = '<img src="{{asset('bundles/tdomview/img/ajax-loader.gif')}}" />';
+    settings.searchContactsUrl = "{{ path('findUserContacts') }}";
+    settings.myGamesLink = "{{ url('gameMygames') }}";
+</script>
